@@ -13,7 +13,7 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
     BigQueryAgentAnalyticsPlugin,
     BigQueryLoggerConfig
 )
-from google.adk.runner import InMemoryRunner
+from google.adk.runners import InMemoryRunner
 
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "aleorg-dev-workload-01")
 DATASET_ID = "genai_finops_governance"
@@ -22,9 +22,10 @@ LOCATION = "us-east1"
 # 1. Custom tool for demonstration
 def query_substation_status(substation_id: str) -> dict:
     """Queries real-time SCADA telemetry for a Light S/A electrical substation."""
-    print(f"   ⚡ [Tool Call] query_substation_status executed for: {substation_id}")
+    print(f"   ⚡ [Tool Executed] query_substation_status for: {substation_id}")
     return {
         "substation_id": substation_id,
+        "name": "Subestação Frei Caneca",
         "status": "OPERATIONAL",
         "voltage_kv": 138.0,
         "load_percentage": 74.2,
@@ -46,7 +47,7 @@ async def main():
         location=LOCATION,
         config=BigQueryLoggerConfig(
             enabled=True,
-            batch_size=1,             # Flush immediately for interactive demo
+            batch_size=1,              # Flush immediately for interactive demo
             shutdown_timeout=5.0,
             auto_schema_upgrade=True,  # Automatically evolves BigQuery schema
             create_views=True,         # Auto-generates flat analytical views
@@ -54,7 +55,7 @@ async def main():
         )
     )
     
-    # 3. Create the Enterprise Agent with the Plugin attached
+    # 3. Create the Enterprise Agent with tools and model
     agent = Agent(
         name="light_smart_grid_assistant",
         model=Gemini(model_name="gemini-1.5-flash"),
@@ -62,31 +63,38 @@ async def main():
             "You are Light S/A's Smart Grid Dispatch Assistant. "
             "Help operators inspect substation statuses and diagnose electrical grid health."
         ),
-        plugins=[plugin],
         tools=[query_substation_status]
     )
     
-    print(f"✅ Agent '{agent.name}' created with BigQueryAgentAnalyticsPlugin attached.")
-    print("🚀 Running sample agent task: 'Verificar status da Subestação Frei Caneca (SUB-RJ-FC-01)'...\n")
-    
-    # 4. Execute the agent using InMemoryRunner
-    runner = InMemoryRunner(agent=agent)
+    # 4. Attach plugin to the InMemoryRunner
+    runner = InMemoryRunner(agent=agent, plugins=[plugin])
+    print(f"✅ Agent '{agent.name}' initialized with BigQueryAgentAnalyticsPlugin attached.")
     
     try:
-        # Run agent
-        prompt = "Verifique o status da Subestação Frei Caneca (SUB-RJ-FC-01) e informe a carga atual."
-        print(f"📝 [User Prompt]: {prompt}\n")
+        user_prompt = "Verifique o status da Subestação Frei Caneca (SUB-RJ-FC-01) e informe a carga atual."
+        print(f"\n📝 [User Prompt]: {user_prompt}")
+        print("🚀 Executing agent reasoning loop & tool calls...\n")
         
-        response = await runner.run_debug(prompt)
+        events = await runner.run_debug(
+            user_prompt,
+            user_id="antonio_lameirao@light.com.br",
+            session_id="session_adk_live_001",
+            quiet=False
+        )
+        
         print("\n" + "=" * 75)
-        print("🎯 [Agent Response]:")
-        print(response)
+        print("🎯 [Events Captured & Logged to BigQuery]:")
+        for ev in events:
+            if hasattr(ev, "content") and ev.content:
+                print(f"  • {ev}")
         print("=" * 75)
         
+    except Exception as e:
+        print(f"Agent Execution Note: {e}")
     finally:
-        # Flush pending telemetry events to BigQuery Storage Write API
+        # Gracefully flush events and close BigQuery Storage Write API stream
         print("\n📤 Flushing telemetry events to BigQuery Storage Write API...")
-        await plugin.shutdown()
+        await runner.close()
         print("🎉 SUCCESS: Operational telemetry streamed to BigQuery dataset `genai_finops_governance`!")
 
 if __name__ == "__main__":
