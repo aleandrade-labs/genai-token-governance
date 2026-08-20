@@ -1,11 +1,13 @@
 """
 Synthetic ADK BigQuery Agent Analytics Telemetry Generator (High-Volume Enterprise Scale)
-Generates ~5,000 sessions and millions of tokens for Light S/A to populate BigQuery
-and power the Looker Studio Executive Dashboard with large-scale data.
+Allows generating millions or billions of tokens on-demand and loading them directly into BigQuery.
 """
+import argparse
 import json
 import random
+import subprocess
 import datetime
+import os
 
 PROJECT_ID = "aleorg-dev-workload-01"
 DATASET_ID = "genai_finops_governance"
@@ -45,17 +47,19 @@ TOOLS = [
     "vertex_search_grounding"
 ]
 
-def generate_enterprise_telemetry(num_sessions: int = 5000) -> list:
+def generate_enterprise_telemetry(num_sessions: int = 5000, days_window: int = 30) -> list:
     rows = []
     end_date = datetime.datetime.now(datetime.timezone.utc)
     
-    print(f"Generating {num_sessions} enterprise multi-turn agent sessions...")
+    print(f"🚀 Generating {num_sessions:,} enterprise multi-turn agent sessions over {days_window} days...")
+    
+    total_tokens_accum = 0
     
     for session_idx in range(num_sessions):
         user_meta = random.choice(USERS)
         
-        # Distribute over the past 30 days
-        days_ago = random.uniform(0, 30)
+        # Distribute over the days window
+        days_ago = random.uniform(0, days_window)
         session_time = end_date - datetime.timedelta(days=days_ago)
         
         session_id = f"sess_{int(session_time.timestamp())}_{random.randint(10000, 99999)}"
@@ -71,12 +75,13 @@ def generate_enterprise_telemetry(num_sessions: int = 5000) -> list:
             turn_time = session_time + datetime.timedelta(seconds=turn * 4.2)
             span_root = f"span_{random.randbytes(6).hex()}"
             
-            # Realistic token volume (compounding context in agent loops)
-            base_prompt = random.randint(1200, 8500) * turn
+            # Realistic compounding token context in agent loops
+            base_prompt = random.randint(1500, 9500) * turn
             prompt_tokens = base_prompt
             cached_tokens = int(prompt_tokens * random.uniform(0.3, 0.75)) if turn > 1 else 0
-            output_tokens = random.randint(200, 1800)
+            output_tokens = random.randint(250, 2200)
             total_tokens = prompt_tokens + output_tokens
+            total_tokens_accum += total_tokens
             
             latency_ms = round(random.uniform(280.0, 1950.0), 1) if "flash" in model_name else round(random.uniform(1400.0, 4800.0), 1)
             
@@ -134,14 +139,52 @@ def generate_enterprise_telemetry(num_sessions: int = 5000) -> list:
                     "status": tool_status
                 })
                 
+    print(f"✨ Generated {len(rows):,} events across {num_sessions:,} sessions.")
+    print(f"🔢 Total Simulated Tokens: {total_tokens_accum:,} ({total_tokens_accum / 1_000_000:.2f} Million Tokens)")
     return rows
 
-if __name__ == "__main__":
-    records = generate_enterprise_telemetry(5000)
-    print(f"Generated {len(records)} high-volume ADK telemetry events.")
+def upload_to_bigquery(filepath: str, project_id: str, dataset_id: str, table_id: str, replace: bool = True):
+    """Uploads generated JSONL telemetry directly into BigQuery."""
+    replace_flag = "--replace=true" if replace else "--noreplace"
+    print(f"\n📤 Uploading {filepath} to BigQuery table `{project_id}.{dataset_id}.{table_id}`...")
     
-    output_path = "bigquery/enterprise_large_events.jsonl"
-    with open(output_path, "w") as f:
+    cmd = [
+        "bq", f"--project_id={project_id}", "--location=us-east1", "load",
+        replace_flag,
+        "--autodetect",
+        "--source_format=NEWLINE_DELIMITED_JSON",
+        f"{dataset_id}.{table_id}",
+        filepath
+    ]
+    try:
+        subprocess.run(cmd, check=True)
+        print("✅ BigQuery upload complete! Refresh your Looker Studio dashboard to see the updated figures.")
+    except Exception as e:
+        print(f"❌ Error uploading to BigQuery: {e}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate enterprise ADK token telemetry for BigQuery")
+    parser.add_argument("--sessions", type=int, default=5000, help="Number of agent sessions to generate (e.g. 5000, 10000, 25000)")
+    parser.add_argument("--days", type=int, default=30, help="Number of days in the historical window")
+    parser.add_argument("--upload", action="store_true", help="Automatically upload to BigQuery after generation")
+    parser.add_argument("--append", action="store_true", help="Append to existing BigQuery table instead of replacing")
+    parser.add_argument("--output", type=str, default="bigquery/enterprise_large_events.jsonl", help="Output JSONL file path")
+    
+    args = parser.parse_args()
+    
+    records = generate_enterprise_telemetry(num_sessions=args.sessions, days_window=args.days)
+    
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    with open(args.output, "w") as f:
         for r in records:
             f.write(json.dumps(r) + "\n")
-    print(f"Successfully saved to {output_path}")
+    print(f"💾 Saved events to {args.output}")
+    
+    if args.upload:
+        upload_to_bigquery(
+            filepath=args.output,
+            project_id=PROJECT_ID,
+            dataset_id=DATASET_ID,
+            table_id=TABLE_ID,
+            replace=not args.append
+        )
