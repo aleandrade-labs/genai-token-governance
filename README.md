@@ -322,5 +322,17 @@ Add an **"AI & GenAI Token Governance"** page to your Looker Studio report:
 
 - [x] **SKU-Level Ingestion**: Billing export enabled for `aiplatform.googleapis.com` and `discoveryengine.googleapis.com`.
 - [x] **Metadata Attribution**: User LDAP, `cost_center`, `app_code`, and `business_owner` injected in requests.
-- [x] **BigQuery Views**: `v_genai_token_consumption_by_user`, `v_genai_model_unit_economics`, and `v_vertex_search_query_analytics`.
-- [x] **Looker Studio Dashboard**: Real-time tracking of token counts, model share, and cost per user.
+- [x] **BigQuery Views**: `v_adk_executive_kpis`, `v_adk_user_leaderboard`, `v_adk_model_distribution`, `v_adk_cost_center_attribution`, `v_adk_tool_analytics`, `v_adk_daily_trend`.
+- [x] **Looker Studio Dashboard**: Real-time tracking of token counts, model share, tool health, and cost per user.
+
+---
+
+## 📚 9. Documentation Suite (`docs/`) & Resources
+
+- 🏗️ **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**: Deep dive into Log Router sinks, Storage Write API streaming, and BigQuery partitioning.
+- 🤖 **[`docs/ADK_BIGQUERY_ANALYTICS.md`](docs/ADK_BIGQUERY_ANALYTICS.md)**: Implementation guide for [ADK BigQuery Agent Analytics](https://adk.dev/integrations/bigquery-agent-analytics/).
+- 🛠️ **[`docs/ADK_FINOPS_WRAPPER.md`](docs/ADK_FINOPS_WRAPPER.md)**: Python wrapper with automatic SAP cost center and user LDAP attribution.
+- 🔍 **[`docs/VERTEX_SEARCH_GOVERNANCE.md`](docs/VERTEX_SEARCH_GOVERNANCE.md)**: Discovery Engine query pricing, document indexing, and RAG grounding.
+- 📊 **[`docs/LOOKER_STUDIO_DASHBOARD.md`](docs/LOOKER_STUDIO_DASHBOARD.md)**: Step-by-step widget recipes and layout for Looker Studio.
+- 🗄️ **[`bigquery/adk_agent_analytics_views.sql`](bigquery/adk_agent_analytics_views.sql)**: BigQuery SQL DDL for the 6 pre-calculated analytical views.
+
