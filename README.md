@@ -40,7 +40,7 @@ By integrating the official **`BigQueryAgentAnalyticsPlugin`** from the [Google 
 ## 🏗️ 2. End-to-End Architecture
 
 <p align="center">
-  <img src="docs/architecture_genai_governance.png" alt="Google Cloud FinOps — GenAI Token & Cost Governance Architecture" width="100%" />
+  <img src="docs/architecture_genai_governance.svg" alt="Google Cloud FinOps — GenAI Token & Cost Governance Architecture" width="100%" />
 </p>
 
 ---
