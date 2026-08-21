@@ -1,338 +1,241 @@
-# 🧠 AI & GenAI Token Governance Guide: Vertex AI, Vertex Search & ADK
+# 🧠 GenAI Token & Cost Governance with Official Google ADK
 
-**Audience:** FinOps Analysts, AI Engineers, Enterprise Architects, Product Managers, CTO Office  
-**Purpose:** End-to-end framework for tracking, attributing, and governing **AI token consumption and costs** across Google Cloud Vertex AI (Gemini / Foundation Models), Vertex AI Search (Discovery Engine), and the Agent Development Kit (ADK).
+[![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)](https://cloud.google.com)
+[![Google ADK](https://img.shields.io/badge/Google_ADK-2.7.1-34A853?style=for-the-badge&logo=google&logoColor=white)](https://adk.dev)
+[![Vertex AI](https://img.shields.io/badge/Vertex_AI-Gemini_2.0-EA4335?style=for-the-badge&logo=google&logoColor=white)](https://cloud.google.com/vertex-ai)
+[![BigQuery](https://img.shields.io/badge/BigQuery-Storage_Write_API-669DF6?style=for-the-badge&logo=google-bigquery&logoColor=white)](https://cloud.google.com/bigquery)
+[![Looker Studio](https://img.shields.io/badge/Looker_Studio-Real_Time_BI-FBBC04?style=for-the-badge&logo=google&logoColor=white)](https://lookerstudio.google.com)
+
+**Enterprise Engagement:** Google Cloud PSO — FinOps & GenAI Governance  
+**Environment:** Argolis (`aleorg-dev-workload-01` | Org ID: `1068294623135`)  
+**Official Reference:** [Google Agent Development Kit (ADK) — BigQuery Agent Analytics](https://adk.dev/integrations/bigquery-agent-analytics/)
 
 ---
 
 ## 📋 Table of Contents
-1. [Executive Summary & Core Objectives](#-1-executive-summary--core-objectives)
-2. [GenAI Governance Architecture](#-2-genai-governance-architecture)
-3. [Component 1: Vertex AI Foundation Models (Gemini 1.5 Pro / Flash)](#-3-component-1-vertex-ai-foundation-models)
-4. [Component 2: Vertex AI Search & RAG Grounding](#-4-component-2-vertex-ai-search--rag-grounding)
-5. [Component 3: Agent Development Kit (ADK) Multi-Turn Governance](#-5-component-3-agent-development-kit-adk-multi-turn-governance)
-6. [BigQuery AI Telemetry Schema & SQL Views](#-6-bigquery-ai-telemetry-schema--sql-views)
-7. [Developer Implementation: ADK FinOps Metadata Wrapper](#-7-developer-implementation-adk-finops-metadata-wrapper)
-8. [Looker Studio AI Unit Economics Dashboard](#-8-looker-studio-ai-unit-economics-dashboard)
+1. [Executive Overview & Value Proposition](#-1-executive-overview--value-proposition)
+2. [End-to-End Architecture](#-2-end-to-end-architecture)
+3. [Real-Time Storage Write API vs. Billing Latency](#-3-real-time-storage-write-api-vs-billing-latency)
+4. [Quickstart: Setup & Prerequisites](#-4-quickstart-setup--prerequisites)
+5. [How to Generate REAL Altostrat Token Telemetry](#-5-how-to-generate-real-altostrat-token-telemetry)
+6. [How to Generate High-Volume MOCK / Synthetic Datasets (500M+ Tokens)](#-6-how-to-generate-high-volume-mock--synthetic-datasets)
+7. [How to Erase / Reset BigQuery Data](#-7-how-to-erase--reset-bigquery-data)
+8. [BigQuery Schema & Analytical Views](#-8-bigquery-schema--analytical-views)
+9. [Executive Looker Studio Dashboard Setup](#-9-executive-looker-studio-dashboard-setup)
+10. [CLI Command & Flag Reference](#-10-cli-command--flag-reference)
 
 ---
 
-## 🌟 1. Executive Summary & Core Objectives
+## 🎯 1. Executive Overview & Value Proposition
 
-As enterprise adoption of Generative AI expands at Light S/A, traditional cloud cost management must evolve into **AI Unit Economics**. The goal of this framework is to answer critical business and operational questions:
+As enterprise teams scale Generative AI agents on Google Cloud (Vertex AI Gemini 1.5/2.0, Claude, Search & RAG), CFOs and FinOps teams face two critical blindspots:
+1. **Billing Latency**: Standard Cloud Billing exports take **4 to 24 hours** to settle, preventing real-time anomaly detection.
+2. **Missing Token Attribution**: Standard billing shows total Vertex AI cost, but cannot attribute costs to individual **Agent Names**, **Tool Calls**, **SAP Cost Centers**, or **End-User Email Callers**.
 
-1. **User & Team Attribution:** Which users, business units, and applications (`app_code`) are consuming the most tokens?
-2. **Model Tier Optimization:** What is the cost and token distribution between high-capability models (`gemini-1.5-pro`) and cost-efficient models (`gemini-1.5-flash`)?
-3. **Prompt vs. Output Economics:** Are teams optimizing prompt context (e.g. context caching) versus generating high-volume candidate output tokens?
-4. **Vertex Search & RAG ROI:** How many search queries are performed, what is the document indexing footprint, and what is the cost per grounded response?
-5. **Agentic Loops (ADK):** How many tokens and tool invocations are spent per autonomous agent task?
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 AI FINOPS METRIC PILLARS                               │
-├──────────────────────────────┬─────────────────────────────┬───────────────────────────┤
-│ 1. TOKEN CONSUMPTION         │ 2. COST ATTRIBUTION         │ 3. UNIT ECONOMICS         │
-│ • Prompt (Input) Tokens      │ • Attribution by User/LDAP  │ • Cost per User Session   │
-│ • Cached Prompt Tokens       │ • Attribution by Cost Center│ • Cost per Search Query   │
-│ • Candidate (Output) Tokens  │ • Attribution by App Code   │ • Flash vs Pro Ratio      │
-│ • Embedding Characters       │ • Attribution by Business   │ • Token Cache Hit %       │
-└──────────────────────────────┴─────────────────────────────┴───────────────────────────┘
-```
+### The Solution: Official Google ADK BigQuery Analytics
+By integrating the official **`BigQueryAgentAnalyticsPlugin`** from the [Google Agent Development Kit (ADK)](https://adk.dev), every multi-turn prompt, candidate token, tool invocation, and latency span is streamed **in sub-second real time (< 1s)** directly to BigQuery via the gRPC **BigQuery Storage Write API**, with **Zero API Keys** required (100% IAM & ADC authenticated).
 
 ---
 
-## 🏛️ 2. GenAI Governance Architecture
+## 🏗️ 2. End-to-End Architecture
 
-The governance architecture combines **Cloud Billing Export**, **Cloud Logging Log Router Sink**, and **Application-Level Telemetry** into BigQuery:
+```mermaid
+flowchart TD
+    subgraph CALLERS["1. Enterprise AI Callers & Agents"]
+        USER["Authenticated User<br/>(admin@alexandrade.altostrat.com)"]
+        AGENT["Google ADK Agent<br/>(smart_grid_assistant)"]
+        TOOL["SCADA / CRM Tool<br/>(query_substation_status)"]
+    end
 
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                  GENAI INVOCATION LAYER                                          │
-│                                                                                                  │
-│   [ 1. Vertex AI Models ]               [ 2. Vertex Search / RAG ]       [ 3. ADK Agents / Flows ]
-│   (Gemini 1.5 Pro, Flash, Embeddings)   (Discovery Engine Search/RAG)    (Multi-turn tool calls) │
-└─────────────────────────────────┬────────────────────────────────┬───────────────────────────────┘
-                                  │                                │
-                                  ▼                                ▼
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                   TELEMETRY & INGESTION LAYER                                    │
-│                                                                                                  │
-│  • Google Cloud Billing Export: Ingests SKU-level token charges, list price, and discounts.      │
-│  • Cloud Logging Log Sink: Streams Vertex AI request/response metadata into BigQuery.           │
-│  • ADK Client Wrapper: Injects `user_id`, `session_id`, `app_code`, and `cost_center` tags.       │
-└─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                  │
-                                  ▼
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                   BIGQUERY AI ANALYTICS LAYER                                    │
-│                                                                                                  │
-│  • `v_genai_token_consumption_by_user`: User-level prompt/output token consumption.             │
-│  • `v_genai_model_unit_economics`: Cost per 1K tokens by model family.                          │
-│  • `v_vertex_search_query_analytics`: Search query count, grounding units, indexing cost.        │
-│  • `v_adk_agent_governance`: Agent tool invocations, multi-turn reasoning cost.                  │
-└─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                  │
-                                  ▼
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                           LOOKER STUDIO EXECUTIVE AI GOVERNANCE DASHBOARD                        │
-│                                                                                                  │
-│  [ Top Consumers (Users) ]   [ Token Distribution by Model ]   [ Cost Allocation by Cost Center] │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+    subgraph ADK["2. Google ADK Runtime Engine (adk.dev)"]
+        RUNNER["InMemoryRunner<br/>(Multi-Turn Reasoning Loop)"]
+        PLUGIN["BigQueryAgentAnalyticsPlugin<br/>(gRPC Storage Write API)"]
+    end
+
+    subgraph GCP["3. Google Cloud Vertex AI & BigQuery"]
+        VERTEX["Vertex AI Model Garden<br/>(Gemini 1.5 Flash / Pro, Gemini 2.0)"]
+        BQ_TABLE["BigQuery Partitioned Table<br/>aleorg-dev-workload-01.genai_finops_governance"]
+        BQ_VIEWS["6 Analytical SQL Views<br/>(v_adk_executive_kpis, v_adk_user_leaderboard)"]
+    end
+
+    subgraph BI["4. Executive FinOps Dashboards"]
+        LOOKER["Looker Studio Executive Dashboard<br/>(Real-Time Scorecards & Drill-Down)"]
+        CHAT["Google Chat Proactive FinOps Alerts"]
+    end
+
+    USER ==>|Prompt Request| AGENT
+    AGENT --> RUNNER
+    RUNNER <==>|Inference & Token Metadata| VERTEX
+    RUNNER <==>|Autonomous Function Call| TOOL
+    RUNNER ==>|Live Telemetry Events| PLUGIN
+    PLUGIN ==>|Sub-Second Streaming| BQ_TABLE
+    BQ_TABLE --> BQ_VIEWS
+    BQ_VIEWS --> LOOKER
+    BQ_VIEWS -.-> CHAT
 ```
 
 ---
 
-## 🤖 3. Component 1: Vertex AI Foundation Models
+## ⚡ 3. Real-Time Storage Write API vs. Billing Latency
 
-Vertex AI generates billing line items and usage telemetry for all text, multimodal, and embedding requests:
+| Feature | Standard GCP Cloud Billing Export | Official ADK BigQuery Agent Analytics |
+| :--- | :--- | :--- |
+| **Ingestion Latency** | **4 to 24 Hours** (Batch reconciliation) | **Sub-Second (< 1000 ms)** (gRPC streaming) |
+| **Granularity** | Project & SKU level aggregated cost | **Per-prompt, per-candidate, per-tool call, per-user** |
+| **Tool Calling Telemetry** | ❌ None | ✅ Tool execution duration, status & parameters |
+| **SAP Cost Center Chargeback**| Requires static project label tags | ✅ Dynamic run-time business attribution |
+| **Authentication** | Cloud Billing Admin | **Google Cloud ADC / IAM (Zero API Keys)** |
 
-### Billable Metric SKUs:
-1. **Prompt Tokens (Input)**: Charged per 1,000 characters or 1,000 tokens (e.g. Gemini 1.5 Flash: ~$0.00001875 / 1k tokens $\le 128k$).
-2. **Candidate Tokens (Output)**: Charged per 1,000 tokens (e.g. Gemini 1.5 Flash: ~$0.000075 / 1k tokens $\le 128k$).
-3. **Context Caching Tokens**: Stored prompt tokens (up to 75% discount on input tokens plus hourly storage rate).
-4. **Text Embedding**: Charged per 1,000 characters for `text-embedding-004` / `text-multilingual-embedding-002`.
+---
 
-### Telemetry Payload Extracted from Cloud Logging:
-```json
-{
-  "resource": {
-    "type": "aiplatform.googleapis.com/Endpoint",
-    "labels": { "location": "us-central1", "project_id": "light-attendance-prod-80781068" }
-  },
-  "jsonPayload": {
-    "model": "gemini-1.5-flash-001",
-    "usageMetadata": {
-      "promptTokenCount": 1420,
-      "candidatesTokenCount": 380,
-      "totalTokenCount": 1800,
-      "cachedContentTokenCount": 0
-    },
-    "customLabels": {
-      "user": "raphael_cano",
-      "cost_center": "18207243",
-      "app_code": "cds-34199",
-      "environment": "prod"
-    }
-  }
-}
+## 🚀 4. Quickstart: Setup & Prerequisites
+
+### Step 1: Clone Repository
+```bash
+git clone git@github.com:aleandrade-labs/genai-token-governance.git
+cd genai-token-governance
+```
+
+### Step 2: Create Python Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 3: Authenticate with Google Cloud ADC (Zero API Keys!)
+```bash
+gcloud auth application-default login
+gcloud auth application-default set-quota-project aleorg-dev-workload-01
+gcloud config set project aleorg-dev-workload-01
 ```
 
 ---
 
-## 🔍 4. Component 2: Vertex AI Search & RAG Grounding
+## 👤 5. How to Generate REAL Altostrat Token Telemetry
 
-Vertex AI Search (formerly Generative AI App Builder / Discovery Engine) governs document search, enterprise search, and RAG grounding:
+Run the official Google ADK agent natively using your authenticated **`admin@alexandrade.altostrat.com`** account:
 
-### Billable Metrics for Search:
-1. **Search Queries**: Charged per 1,000 queries (Standard vs. Enterprise Edition with Generative Summarization).
-2. **Indexing & Storage Units**: Charged per GB of indexed unstructured/structured documents (e.g. PDFs in Cloud Storage, BigQuery tables, Google Drive).
-3. **LLM Grounding Calls**: Grounding with Google Search or Enterprise Data Store (charged as search queries + prompt/candidate tokens for grounding answer generation).
+### Option A: Single Interactive Multi-Turn Prompt
+```bash
+.venv/bin/python3 src/run_official_adk_agent.py
+```
+- **What happens**:
+  1. ADK Agent receives prompt: *"Verifique o status da Subestação Frei Caneca (SUB-RJ-FC-01)"*.
+  2. Autonomously calls SCADA tool `query_substation_status('SUB-RJ-FC-01')`.
+  3. Synthesizes technical operator report.
+  4. Streams real execution tokens directly to BigQuery `genai_finops_governance.agent_events` and `adk_events`.
 
----
+### Option B: Multi-Service Altostrat Workload Batch
+```bash
+.venv/bin/python3 src/run_official_adk_agent.py --batch
+```
+- Executes sessions across real Altostrat identities:
+  - `admin@alexandrade.altostrat.com` (`attendance_sac` & `energy_watch_grid`)
+  - `alexandrade@google.com` (`conexao_silvestre_pd` & `substation_copilot`)
+  - `sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com` (`smart_meter_rag`)
 
-## 🛠️ 5. Component 3: Agent Development Kit (ADK) Multi-Turn Governance
-
-ADK builds autonomous multi-step agents that execute tools, query BigQuery, read documents, and run code. 
-
-### Why ADK Needs Dedicated Token Governance:
-- **Agentic Loops**: An agent might run 5–10 iterations (thinking $\rightarrow$ calling tool $\rightarrow$ reading output $\rightarrow$ refining answer).
-- **Compounding Prompt Size**: In multi-turn chat, each iteration resends the entire conversation history, causing exponential prompt token growth if not cached or truncated.
-- **Tool Invocations**: Governance must track how many tokens each specific tool (e.g. `query_database_tool`, `search_knowledge_tool`) consumes.
-
----
-
-## 📊 6. BigQuery AI Telemetry Schema & SQL Views
-
-Create the following views in your `finops_label_governance` dataset to empower Looker Studio:
-
-### View 1: `v_genai_token_consumption_by_user`
-Aggregates daily token usage, prompt vs output ratio, and estimated cost per user:
-
-```sql
-CREATE OR REPLACE VIEW `finops_label_governance.v_genai_token_consumption_by_user` AS
-SELECT
-  DATE(timestamp) AS usage_date,
-  COALESCE(JSON_VALUE(jsonPayload.customLabels.user), 'service_account') AS user_id,
-  JSON_VALUE(jsonPayload.customLabels.app_code) AS app_code,
-  JSON_VALUE(jsonPayload.customLabels.cost_center) AS cost_center,
-  JSON_VALUE(jsonPayload.model) AS model_name,
-  COUNT(1) AS total_requests,
-  SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.promptTokenCount) AS INT64)) AS total_prompt_tokens,
-  SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.cachedContentTokenCount) AS INT64)) AS total_cached_tokens,
-  SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.candidatesTokenCount) AS INT64)) AS total_output_tokens,
-  SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.totalTokenCount) AS INT64)) AS total_tokens,
-  -- Estimated cost calculation based on model rates (example Flash rate)
-  ROUND(
-    SUM(
-      CASE 
-        WHEN JSON_VALUE(jsonPayload.model) LIKE '%flash%' 
-          THEN (CAST(JSON_VALUE(jsonPayload.usageMetadata.promptTokenCount) AS INT64) * 0.00001875 / 1000) + 
-               (CAST(JSON_VALUE(jsonPayload.usageMetadata.candidatesTokenCount) AS INT64) * 0.000075 / 1000)
-        WHEN JSON_VALUE(jsonPayload.model) LIKE '%pro%' 
-          THEN (CAST(JSON_VALUE(jsonPayload.usageMetadata.promptTokenCount) AS INT64) * 0.00125 / 1000) + 
-               (CAST(JSON_VALUE(jsonPayload.usageMetadata.candidatesTokenCount) AS INT64) * 0.00375 / 1000)
-        ELSE 0.0
-      END
-    ), 4
-  ) AS estimated_cost_usd
-FROM `finops_label_governance.vertex_ai_request_logs`
-GROUP BY usage_date, user_id, app_code, cost_center, model_name;
+### Option C: Pass a Specific User Identity
+```bash
+.venv/bin/python3 src/run_official_adk_agent.py --user "admin@alexandrade.altostrat.com"
 ```
 
 ---
 
-### View 2: `v_genai_model_unit_economics`
-Compares efficiency, latency, and average tokens per request across model families:
+## 📈 6. How to Generate High-Volume MOCK / Synthetic Datasets
 
-```sql
-CREATE OR REPLACE VIEW `finops_label_governance.v_genai_model_unit_economics` AS
-SELECT
-  JSON_VALUE(jsonPayload.model) AS model_name,
-  COUNT(1) AS total_invocations,
-  ROUND(AVG(CAST(JSON_VALUE(jsonPayload.usageMetadata.promptTokenCount) AS INT64)), 1) AS avg_prompt_tokens,
-  ROUND(AVG(CAST(JSON_VALUE(jsonPayload.usageMetadata.candidatesTokenCount) AS INT64)), 1) AS avg_output_tokens,
-  ROUND(AVG(CAST(JSON_VALUE(jsonPayload.usageMetadata.totalTokenCount) AS INT64)), 1) AS avg_total_tokens,
-  ROUND(SAFE_DIVIDE(SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.cachedContentTokenCount) AS INT64)), 
-                     SUM(CAST(JSON_VALUE(jsonPayload.usageMetadata.promptTokenCount) AS INT64))) * 100, 2) AS cache_hit_rate_pct
-FROM `finops_label_governance.vertex_ai_request_logs`
-GROUP BY model_name;
+When preparing for large-scale executive demos or stress-testing Looker Studio performance with **millions of tokens**:
+
+```bash
+# Generate 10,000 enterprise sessions (~550 Million Tokens) and upload to BigQuery:
+.venv/bin/python3 src/generate_demo_telemetry.py --sessions 10000 --upload --days 30
+```
+
+### Options:
+- `--sessions 5000`: Number of multi-turn sessions to simulate.
+- `--days 14`: Time distribution window (past N days).
+- `--append`: Append to existing data instead of replacing.
+- `--upload`: Automatically invoke `bq load` into BigQuery table.
+
+---
+
+## 🧹 7. How to Erase / Reset BigQuery Data
+
+### Option A: Via Python Script Flag (Easiest)
+Wipe all data and run a clean fresh session in one command:
+```bash
+.venv/bin/python3 src/run_official_adk_agent.py --clear --batch
+```
+
+### Option B: Via `bq` CLI Command
+```bash
+bq query --use_legacy_sql=false "TRUNCATE TABLE aleorg-dev-workload-01.genai_finops_governance.agent_events"
+bq query --use_legacy_sql=false "TRUNCATE TABLE aleorg-dev-workload-01.genai_finops_governance.adk_events"
 ```
 
 ---
 
-### View 3: `v_vertex_search_query_analytics`
-Tracks search queries, summarization volume, and latency:
+## 🗄️ 8. BigQuery Schema & Analytical Views
 
-```sql
-CREATE OR REPLACE VIEW `finops_label_governance.v_vertex_search_query_analytics` AS
-SELECT
-  DATE(timestamp) AS search_date,
-  resource.labels.project_id AS project_id,
-  JSON_VALUE(jsonPayload.dataStoreId) AS data_store_id,
-  COUNT(1) AS total_search_queries,
-  COUNTIF(JSON_VALUE(jsonPayload.summarySpec) IS NOT NULL) AS queries_with_generative_summary,
-  ROUND(AVG(CAST(JSON_VALUE(jsonPayload.latencyMs) AS FLOAT64)), 2) AS avg_latency_ms,
-  -- Vertex AI Search standard query pricing ($5 per 1,000 queries)
-  ROUND(COUNT(1) * (5.0 / 1000), 4) AS search_cost_usd
-FROM `finops_label_governance.vertex_search_logs`
-GROUP BY search_date, project_id, data_store_id;
-```
+The repository includes pre-built SQL views under [`bigquery/adk_agent_analytics_views.sql`](bigquery/adk_agent_analytics_views.sql):
+
+| View Name | Purpose | Looker Studio Visualization |
+| :--- | :--- | :--- |
+| **`v_adk_executive_kpis`** | Global tokens, active sessions, tool success %, total USD cost | Header Scorecards |
+| **`v_adk_user_leaderboard`** | Consumption ranked by email, app name, and cost center | User Leaderboard Table |
+| **`v_adk_model_distribution`**| Breakdown across Gemini 1.5 Flash, Pro, and Gemini 2.0 | Model Family Donut Chart |
+| **`v_adk_cost_center_attribution`**| Financial chargeback breakdown by SAP Cost Center | Chargeback Attribution Table |
+| **`v_adk_tool_analytics`** | Function calling frequency, latency ms, and error rate | Tool Observability Bar Chart |
+| **`v_adk_daily_trend`** | 30-day token volume and cost trajectory | Time Series Line Chart |
 
 ---
 
-## 💻 7. Developer Implementation: ADK FinOps Metadata Wrapper
-
-To ensure every GenAI call is tagged with the user and customer policy tags, developers wrap Vertex AI client calls using the **ADK FinOps Wrapper**:
-
-```python
-import os
-import vertexai
-from vertexai.generative_models import GenerativeModel
-
-class FinOpsGenerativeModel:
-    """
-    Wrapper for Vertex AI GenerativeModel that automatically injects
-    customer policy tags (cost_center, app_code, user) for FinOps token attribution.
-    """
-    def __init__(
-        self,
-        model_name: str,
-        app_code: str,
-        cost_center: str,
-        user_id: str,
-        environment: str = "prod"
-    ):
-        self.model = GenerativeModel(model_name)
-        self.metadata_labels = {
-            "app_code": app_code,
-            "cost_center": cost_center,
-            "user": user_id,
-            "environment": environment
-        }
-
-    def generate_content(self, prompt: str, **kwargs):
-        """Generates content and logs FinOps token usage telemetry."""
-        # 1. Execute Vertex AI model call
-        response = self.model.generate_content(prompt, **kwargs)
-        
-        # 2. Extract token usage metadata
-        usage = response.usage_metadata
-        prompt_tokens = usage.prompt_token_count
-        output_tokens = usage.candidates_token_count
-        total_tokens = usage.total_token_count
-
-        # 3. Emit structured FinOps telemetry log (streamed automatically to BigQuery)
-        print(f"[FINOPS_AI_USAGE] user={self.metadata_labels['user']} "
-              f"app={self.metadata_labels['app_code']} "
-              f"cost_center={self.metadata_labels['cost_center']} "
-              f"prompt_tokens={prompt_tokens} "
-              f"output_tokens={output_tokens} "
-              f"total_tokens={total_tokens}")
-
-        return response
-
-# Example Usage in an Application:
-# client = FinOpsGenerativeModel(
-#     model_name="gemini-1.5-flash",
-#     app_code="cds-34199",
-#     cost_center="18207243",
-#     user_id="raphael_cano"
-# )
-# response = client.generate_content("Analyze this smart meter reading anomaly.")
-```
-
----
-
-## 📈 8. Looker Studio AI Unit Economics Dashboard
-
-Add an **"AI & GenAI Token Governance"** page to your Looker Studio report:
+## 📊 9. Executive Looker Studio Dashboard Setup
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  🧠 LIGHT S/A — GENAI TOKEN & COST GOVERNANCE DASHBOARD                                                  │
+│  🧠 GOOGLE CLOUD PSO — GENAI TOKEN & COST GOVERNANCE DASHBOARD                                           │
 ├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                                          │
-│  [ Total Tokens ]       [ Prompt Tokens ]       [ Output Tokens ]       [ Total AI Cost ]                │
-│    148.2 M                112.5 M                 35.7 M                  $ 248.50 USD                   │
+│  [ Total Sessions ]     [ Total Tokens ]       [ Cached Tokens ]       [ Total AI Cost (USD) ]           │
+│         5                    30,338                 10,928                    $ 0.01                     │
 │                                                                                                          │
 ├────────────────────────────────────────────────────┬─────────────────────────────────────────────────────┤
-│  👤 TOP GENAI CONSUMERS (BY USER / EMAIL)          │  🤖 TOKEN DISTRIBUTION BY MODEL                     │
-│  ┌────────────────────────┬──────────────┬────────┐│  ┌────────────────────────┬─────────────┬─────────┐ │
-│  │ User / Caller          │ Total Tokens │ Est. $ ││  │ Model Name             │ Tokens (M)  │ Share % │ │
-│  ├────────────────────────┼──────────────┼────────┤│  ├────────────────────────┼─────────────┼─────────┤ │
-│  │ raphael_cano           │  42.1 M      │ $72.50 ││  │ gemini-1.5-flash       │ 104.2 M     │  70.3%  │ │
-│  │ antonio_lameirao       │  28.4 M      │ $48.20 ││  │ gemini-1.5-pro         │  32.1 M     │  21.7%  │ │
-│  │ equipe_transformacao   │  18.7 M      │ $31.10 ││  │ text-embedding-004     │  11.9 M     │   8.0%  │ │
-│  └────────────────────────┴──────────────┴────────┘│  └────────────────────────┴─────────────┴─────────┘ │
+│  👤 TOP GENAI CONSUMERS (ALTOSTRAT ENVIRONMENT)   │  🤖 TOKEN DISTRIBUTION BY MODEL                     │
+│  ┌────────────────────────────────────┬───────────┐│  ┌────────────────────────┬─────────────┬─────────┐ │
+│  │ User / Identity                    │ Tokens    ││  │ Model Name             │ Tokens      │ Share % │ │
+│  ├────────────────────────────────────┼───────────┤│  ├────────────────────────┼─────────────┼─────────┤ │
+│  │ alexandrade@google.com             │ 9,300     ││  │ gemini-1.5-flash       │ 14,088      │  46.4%  │ │
+│  │ admin@alexandrade.altostrat.com    │ 16,618    ││  │ gemini-1.5-pro         │  9,300      │  30.7%  │ │
+│  │ sa-finops-label-governance@...     │ 4,420     ││  │ gemini-2.0-flash       │  6,950      │  22.9%  │ │
+│  └────────────────────────────────────┴───────────┘│  └────────────────────────┴─────────────┴─────────┘ │
 ├────────────────────────────────────────────────────┴─────────────────────────────────────────────────────┤
-│  🏢 COST ALLOCATION BY CUSTOMER COST CENTER (SAP) & APP CODE                                             │
+│  🏢 COST ALLOCATION BY SAP COST CENTER & APPLICATION CODE                                                │
 │  ┌─────────────┬─────────────┬───────────────────────────┬──────────────┬──────────────────┐             │
 │  │ Cost Center │ App Code    │ Application Name          │ Total Tokens │ Total Cost (USD) │             │
 │  ├─────────────┼─────────────┼───────────────────────────┼──────────────┼──────────────────┤             │
-│  │ 18207243    │ cds-34199   │ attendance (SAC)          │  58.4 M      │ $ 98.40          │             │
-│  │ 12272260    │ cds-59339   │ conexao_silvestre (P&D)   │  34.1 M      │ $ 56.20          │             │
-│  │ 18207041    │ cds-34242   │ energy_watch              │  28.9 M      │ $ 49.10          │             │
+│  │ 12272260    │ cds-59339   │ conexao_silvestre_pd      │  9,300       │ $ 0.01           │             │
+│  │ 18207115    │ cds-91023   │ substation_copilot        │  6,950       │ $ 0.00           │             │
+│  │ 18207243    │ cds-34199   │ attendance_sac            │  5,880       │ $ 0.00           │             │
+│  │ 18206922    │ cds-77211   │ smart_meter_rag           │  4,420       │ $ 0.00           │             │
+│  │ 18207041    │ cds-34242   │ energy_watch_grid         │  3,788       │ $ 0.00           │             │
 │  └─────────────┴─────────────┴───────────────────────────┴──────────────┴──────────────────┘             │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## 🎯 Summary Checklist for AI Governance
-
-- [x] **SKU-Level Ingestion**: Billing export enabled for `aiplatform.googleapis.com` and `discoveryengine.googleapis.com`.
-- [x] **Metadata Attribution**: User LDAP, `cost_center`, `app_code`, and `business_owner` injected in requests.
-- [x] **BigQuery Views**: `v_adk_executive_kpis`, `v_adk_user_leaderboard`, `v_adk_model_distribution`, `v_adk_cost_center_attribution`, `v_adk_tool_analytics`, `v_adk_daily_trend`.
-- [x] **Looker Studio Dashboard**: Real-time tracking of token counts, model share, tool health, and cost per user.
+### Steps to Refresh Looker Studio:
+1. Open your **Looker Studio Report**.
+2. Click **`...` (More Options) $\rightarrow$ Refresh Data** (or press `Ctrl+Shift+R` / `Cmd+Shift+R`).
+3. All charts instantly reflect your latest BigQuery runs!
 
 ---
 
-## 📚 9. Documentation Suite (`docs/`) & Resources
+## 🛠️ 10. CLI Command & Flag Reference
 
-- 🏗️ **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**: Deep dive into Log Router sinks, Storage Write API streaming, and BigQuery partitioning.
-- 🤖 **[`docs/ADK_BIGQUERY_ANALYTICS.md`](docs/ADK_BIGQUERY_ANALYTICS.md)**: Implementation guide for [ADK BigQuery Agent Analytics](https://adk.dev/integrations/bigquery-agent-analytics/).
-- 🛠️ **[`docs/ADK_FINOPS_WRAPPER.md`](docs/ADK_FINOPS_WRAPPER.md)**: Python wrapper with automatic SAP cost center and user LDAP attribution.
-- 🔍 **[`docs/VERTEX_SEARCH_GOVERNANCE.md`](docs/VERTEX_SEARCH_GOVERNANCE.md)**: Discovery Engine query pricing, document indexing, and RAG grounding.
-- 📊 **[`docs/LOOKER_STUDIO_DASHBOARD.md`](docs/LOOKER_STUDIO_DASHBOARD.md)**: Step-by-step widget recipes and layout for Looker Studio.
-- 🗄️ **[`bigquery/adk_agent_analytics_views.sql`](bigquery/adk_agent_analytics_views.sql)**: BigQuery SQL DDL for the 6 pre-calculated analytical views.
-
+| Command | Purpose |
+| :--- | :--- |
+| `.venv/bin/python3 src/run_official_adk_agent.py` | Run single live interactive ADK agent session |
+| `.venv/bin/python3 src/run_official_adk_agent.py --clear` | Erase past data & run 1 clean session |
+| `.venv/bin/python3 src/run_official_adk_agent.py --clear --batch` | Erase past data & run multi-workload Altostrat batch |
+| `.venv/bin/python3 src/run_official_adk_agent.py --user "email@domain.com"` | Run session with custom user identity |
+| `.venv/bin/python3 src/generate_demo_telemetry.py --sessions 10000 --upload` | Generate 550M+ synthetic demo tokens |

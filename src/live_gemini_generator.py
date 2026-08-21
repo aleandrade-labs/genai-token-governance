@@ -19,39 +19,39 @@ TABLE_ID = "agent_events"
 # Realistic enterprise prompt library for Light S/A
 REAL_ENTERPRISE_PROMPTS = [
     {
-        "prompt": "Explique resumidamente em português como a Light S/A pode usar medidores inteligentes para detectar perdas não técnicas (gatos de energia).",
+        "prompt": "Explique resumidamente em português como podemos usar medidores inteligentes para detectar perdas não técnicas na rede elétrica.",
         "app_code": "cds-77211",
         "cost_center": "18206922",
         "app_name": "smart_meter_rag",
-        "user_id": "carlos_eduardo@light.com.br"
+        "user_id": "admin@alexandrade.altostrat.com"
     },
     {
-        "prompt": "Quais são as melhores práticas para despacho de equipes de campo em subestações de alta tensão durante tempestades de verão no Rio de Janeiro?",
+        "prompt": "Quais são as melhores práticas para despacho de equipes de campo em subestações de alta tensão durante tempestades severas?",
         "app_code": "cds-91023",
         "cost_center": "18207115",
         "app_name": "substation_copilot",
-        "user_id": "equipe_transformacao@light.com.br"
+        "user_id": "alexandrade@google.com"
     },
     {
         "prompt": "Redija uma mensagem empática de atendimento ao cliente (SAC) informando sobre manutenção preventiva programada na rede elétrica.",
         "app_code": "cds-34199",
         "cost_center": "18207243",
         "app_name": "attendance_sac",
-        "user_id": "raphael_cano@light.com.br"
+        "user_id": "admin@alexandrade.altostrat.com"
     },
     {
         "prompt": "Analise o impacto do aumento da temperatura média no carregamento de transformadores de distribuição urbana.",
         "app_code": "cds-34242",
         "cost_center": "18207041",
         "app_name": "energy_watch_grid",
-        "user_id": "antonio_lameirao@light.com.br"
+        "user_id": "admin@alexandrade.altostrat.com"
     },
     {
         "prompt": "Quais indicadores FinOps devem ser monitorados para controlar o custo de inferência de LLMs em escala empresarial?",
         "app_code": "cds-59339",
         "cost_center": "12272260",
         "app_name": "conexao_silvestre_pd",
-        "user_id": "mariana_souza@light.com.br"
+        "user_id": "sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com"
     }
 ]
 

@@ -14,18 +14,18 @@ DATASET_ID = "genai_finops_governance"
 TABLE_ID = "agent_events"
 
 USERS = [
-    {"user_id": "raphael_cano@light.com.br", "app_code": "cds-34199", "cost_center": "18207243", "app_name": "attendance_sac", "env": "prod"},
-    {"user_id": "antonio_lameirao@light.com.br", "app_code": "cds-34242", "cost_center": "18207041", "app_name": "energy_watch_grid", "env": "prod"},
-    {"user_id": "mariana_souza@light.com.br", "app_code": "cds-59339", "cost_center": "12272260", "app_name": "conexao_silvestre_pd", "env": "prod"},
-    {"user_id": "carlos_eduardo@light.com.br", "app_code": "cds-77211", "cost_center": "18206922", "app_name": "smart_meter_rag", "env": "prod"},
-    {"user_id": "equipe_transformacao@light.com.br", "app_code": "cds-91023", "cost_center": "18207115", "app_name": "substation_copilot", "env": "prod"},
-    {"user_id": "lucas_mendes@light.com.br", "app_code": "cds-11045", "cost_center": "18207330", "app_name": "line_maintenance_ai", "env": "prod"},
-    {"user_id": "beatriz_almeida@light.com.br", "app_code": "cds-88321", "cost_center": "18207455", "app_name": "energy_trading_analytics", "env": "prod"},
-    {"user_id": "fernando_costa@light.com.br", "app_code": "cds-44102", "cost_center": "18207510", "app_name": "cyber_threat_detector", "env": "prod"},
-    {"user_id": "sa-adk-automation@light.iam.gserviceaccount.com", "app_code": "cds-34199", "cost_center": "18207243", "app_name": "attendance_batch", "env": "prod"},
-    {"user_id": "sa-grid-copilot@light.iam.gserviceaccount.com", "app_code": "cds-34242", "cost_center": "18207041", "app_name": "automated_grid_balancer", "env": "prod"},
-    {"user_id": "sa-vertex-search@light.iam.gserviceaccount.com", "app_code": "cds-77211", "cost_center": "18206922", "app_name": "discovery_engine_indexer", "env": "prod"},
-    {"user_id": "developer_sandbox@light.com.br", "app_code": "cds-19302", "cost_center": "18207800", "app_name": "hr_training_advisor", "env": "dev"}
+    {"user_id": "admin@alexandrade.altostrat.com", "app_code": "cds-34199", "cost_center": "18207243", "app_name": "attendance_sac", "env": "prod"},
+    {"user_id": "admin@alexandrade.altostrat.com", "app_code": "cds-34242", "cost_center": "18207041", "app_name": "energy_watch_grid", "env": "prod"},
+    {"user_id": "alexandrade@google.com", "app_code": "cds-59339", "cost_center": "12272260", "app_name": "conexao_silvestre_pd", "env": "prod"},
+    {"user_id": "admin@alexandrade.altostrat.com", "app_code": "cds-77211", "cost_center": "18206922", "app_name": "smart_meter_rag", "env": "prod"},
+    {"user_id": "alexandrade@google.com", "app_code": "cds-91023", "cost_center": "18207115", "app_name": "substation_copilot", "env": "prod"},
+    {"user_id": "sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "app_code": "cds-11045", "cost_center": "18207330", "app_name": "line_maintenance_ai", "env": "prod"},
+    {"user_id": "admin@alexandrade.altostrat.com", "app_code": "cds-88321", "cost_center": "18207455", "app_name": "energy_trading_analytics", "env": "prod"},
+    {"user_id": "alexandrade@google.com", "app_code": "cds-44102", "cost_center": "18207510", "app_name": "cyber_threat_detector", "env": "prod"},
+    {"user_id": "sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "app_code": "cds-34199", "cost_center": "18207243", "app_name": "attendance_batch", "env": "prod"},
+    {"user_id": "sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "app_code": "cds-34242", "cost_center": "18207041", "app_name": "automated_grid_balancer", "env": "prod"},
+    {"user_id": "sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "app_code": "cds-77211", "cost_center": "18206922", "app_name": "discovery_engine_indexer", "env": "prod"},
+    {"user_id": "admin@alexandrade.altostrat.com", "app_code": "cds-19302", "cost_center": "18207800", "app_name": "hr_training_advisor", "env": "dev"}
 ]
 
 MODELS = [

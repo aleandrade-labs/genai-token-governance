@@ -1,7 +1,7 @@
 """
 Official Google ADK Agent Implementation with BigQueryAgentAnalyticsPlugin
 Direct implementation of https://adk.dev/integrations/bigquery-agent-analytics/
-Runs enterprise Light S/A Agents with the native ADK plugin, streaming live telemetry
+Runs enterprise Agents with the native ADK plugin, streaming live telemetry
 directly to BigQuery using the BigQuery Storage Write API.
 """
 import os
@@ -10,6 +10,7 @@ import json
 import time
 import argparse
 import asyncio
+import subprocess
 from datetime import datetime, timezone
 from typing import AsyncGenerator
 from google.genai import types
@@ -30,9 +31,20 @@ TABLE_ID = "adk_events"
 LOOKER_TABLE_ID = "agent_events"
 LOCATION = "us-east1"
 
+def get_active_gcloud_user() -> str:
+    """Detects the currently authenticated gcloud account (e.g. admin@alexandrade.altostrat.com)."""
+    try:
+        res = subprocess.run(["gcloud", "config", "get-value", "account"], capture_output=True, text=True, check=True)
+        acc = res.stdout.strip()
+        if acc and "@" in acc:
+            return acc
+    except Exception:
+        pass
+    return "admin@alexandrade.altostrat.com"
+
 # 1. Custom SCADA Substation Inspection Tool
 def query_substation_status(substation_id: str) -> dict:
-    """Queries real-time SCADA telemetry for a Light S/A electrical substation."""
+    """Queries real-time SCADA telemetry for an electrical substation."""
     print(f"\n   ⚡ [SCADA Tool Executing]: query_substation_status('{substation_id}')")
     return {
         "substation_id": substation_id,
@@ -46,9 +58,9 @@ def query_substation_status(substation_id: str) -> dict:
     }
 
 # 2. Enterprise Resilient LLM Wrapper for Vertex AI
-class LightEnterpriseVertexLlm(BaseLlm):
+class AltostratEnterpriseVertexLlm(BaseLlm):
     """
-    Enterprise Vertex AI LLM implementation for Light S/A.
+    Enterprise Vertex AI LLM implementation.
     Connects to Google Cloud Vertex AI and executes multi-turn tool reasoning.
     """
     model: str = "gemini-1.5-flash"
@@ -186,9 +198,11 @@ def record_looker_telemetry(user_id: str, app_code: str, cost_center: str, app_n
     except Exception as e:
         print(f"Notice: {e}")
 
-async def run_live_agent(clear: bool = False, batch: bool = False):
+async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool = False):
     if clear:
         clear_bigquery_data()
+        
+    active_user = user_id or get_active_gcloud_user()
         
     print("=" * 75)
     print("🤖 OFFICIAL GOOGLE ADK BIGQUERY AGENT ANALYTICS (adk.dev)")
@@ -212,12 +226,12 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
     )
     
     # 4. Create the Enterprise Agent with tools and model
-    llm = LightEnterpriseVertexLlm(model="gemini-1.5-flash", project_id=PROJECT_ID)
+    llm = AltostratEnterpriseVertexLlm(model="gemini-1.5-flash", project_id=PROJECT_ID)
     agent = Agent(
-        name="light_smart_grid_assistant",
+        name="smart_grid_assistant",
         model=llm,
         instruction=(
-            "You are Light S/A's Smart Grid Dispatch Assistant. "
+            "You are the Smart Grid Dispatch Assistant. "
             "Help operators inspect substation statuses and diagnose electrical grid health."
         ),
         tools=[query_substation_status]
@@ -226,6 +240,7 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
     # 5. Attach plugin to the InMemoryRunner
     runner = InMemoryRunner(agent=agent, plugins=[plugin])
     print(f"🏢 Configured with Google Cloud Project `{PROJECT_ID}`.")
+    print(f"👤 Authenticated Caller: `{active_user}`.")
     print(f"✅ Agent '{agent.name}' initialized with BigQueryAgentAnalyticsPlugin attached.")
     
     try:
@@ -236,7 +251,7 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
         
         events = await runner.run_debug(
             user_prompt,
-            user_id="antonio_lameirao@light.com.br",
+            user_id=active_user,
             session_id=f"session_adk_live_{int(time.time())}",
             quiet=False
         )
@@ -252,7 +267,7 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
         
         # Log to Looker datasource
         record_looker_telemetry(
-            user_id="antonio_lameirao@light.com.br",
+            user_id=active_user,
             app_code="cds-34242",
             cost_center="18207041",
             app_name="energy_watch_grid",
@@ -261,23 +276,24 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
             out_tok=368,
             tool_name="query_substation_status"
         )
+        print(f"📊 Recorded live execution for `{active_user}` into BigQuery Looker Studio views.")
         
         if batch:
-            print("\n👥 Running multi-user enterprise scenario for Light S/A teams...")
+            print(f"\n👥 Running Altostrat environment multi-service workload scenario...")
             
-            # Additional users
+            # Altostrat environment accounts
             scenarios = [
-                ("raphael_cano@light.com.br", "cds-34199", "18207243", "attendance_sac", "gemini-1.5-flash", 5400, 480, "search_customer_history"),
-                ("mariana_souza@light.com.br", "cds-59339", "12272260", "conexao_silvestre_pd", "gemini-1.5-pro", 8200, 1100, "calculate_feeder_loss"),
-                ("carlos_eduardo@light.com.br", "cds-77211", "18206922", "smart_meter_rag", "gemini-1.5-flash", 4100, 320, "check_smart_meter_billing_anomaly"),
-                ("equipe_transformacao@light.com.br", "cds-91023", "18207115", "substation_copilot", "gemini-2.0-flash", 6200, 750, "query_substation_telemetry")
+                (active_user, "cds-34199", "18207243", "attendance_sac", "gemini-1.5-flash", 5400, 480, "search_customer_history"),
+                ("alexandrade@google.com", "cds-59339", "12272260", "conexao_silvestre_pd", "gemini-1.5-pro", 8200, 1100, "calculate_feeder_loss"),
+                ("sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "cds-77211", "18206922", "smart_meter_rag", "gemini-1.5-flash", 4100, 320, "check_smart_meter_billing_anomaly"),
+                (active_user, "cds-91023", "18207115", "substation_copilot", "gemini-2.0-flash", 6200, 750, "query_substation_telemetry")
             ]
             
-            for user_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name in scenarios:
-                print(f"   👤 Executed session for {user_id} ({app_name} | {model_name})")
-                record_looker_telemetry(user_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name)
+            for u_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name in scenarios:
+                print(f"   👤 Executed session for {u_id} ({app_name} | {model_name})")
+                record_looker_telemetry(u_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name)
                 
-            print("✅ All enterprise sessions executed and recorded successfully!")
+            print("✅ All Altostrat environment sessions recorded successfully!")
 
     except Exception as e:
         print(f"ℹ️ Agent Notice: {e}")
@@ -290,8 +306,9 @@ async def run_live_agent(clear: bool = False, batch: bool = False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Official Google ADK Agent with BigQuery Analytics")
+    parser.add_argument("--user", type=str, default=None, help="Caller email / identity (defaults to active gcloud account)")
     parser.add_argument("--clear", action="store_true", help="Erase past BigQuery data before running")
-    parser.add_argument("--batch", action="store_true", help="Run multi-user enterprise scenario for all Light S/A teams")
+    parser.add_argument("--batch", action="store_true", help="Run multi-workload scenario for Altostrat environment")
     
     args = parser.parse_args()
-    asyncio.run(run_live_agent(clear=args.clear, batch=args.batch))
+    asyncio.run(run_live_agent(user_id=args.user, clear=args.clear, batch=args.batch))
