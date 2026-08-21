@@ -1,4 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1350 820" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', Roboto, Arial, sans-serif;">
+"""
+Generates the official Google Cloud Mingrammer-style Architecture Diagram for GenAI Token Governance.
+Features authentic Google Cloud service icons, white canvas, light gray cluster groupings,
+and clear directional flow arrows.
+"""
+import os
+
+def render_genai_governance_mingrammer_svg(output_path: str):
+    svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1350 820" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Google Sans', Roboto, Arial, sans-serif;">
   <defs>
     <!-- Shadows -->
     <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
@@ -242,3 +250,11 @@
   <path d="M 857 560 L 1000 560 L 1000 392 L 1128 392" stroke="#1e8e3e" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowGreen)" />
 
 </svg>
+"""
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(svg)
+    print(f"✅ Rendered: {output_path}")
+
+if __name__ == "__main__":
+    render_genai_governance_mingrammer_svg("/Users/alexandrade/codes/catlab/light/genai-token-governance/docs/architecture_genai_governance.svg")

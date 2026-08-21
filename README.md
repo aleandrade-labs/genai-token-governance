@@ -43,40 +43,7 @@ By integrating the official **`BigQueryAgentAnalyticsPlugin`** from the [Google 
   <img src="docs/architecture_genai_governance.svg" alt="Google Cloud FinOps — GenAI Token & Cost Governance Architecture" width="100%" />
 </p>
 
-```mermaid
-flowchart TD
-    subgraph CALLERS["1. Authenticated Callers & Enterprise Users"]
-        USER["Authenticated User<br/>(admin@alexandrade.altostrat.com)"]
-        AGENT["Google ADK Agent<br/>(smart_grid_assistant)"]
-        TOOL["SCADA / CRM Tool<br/>(query_substation_status)"]
-    end
-
-    subgraph ADK["2. Google ADK Runtime Engine (adk.dev)"]
-        RUNNER["InMemoryRunner<br/>(Multi-Turn Reasoning Loop)"]
-        PLUGIN["BigQueryAgentAnalyticsPlugin<br/>(gRPC Storage Write API)"]
-    end
-
-    subgraph GCP["3. Google Cloud Vertex AI & BigQuery"]
-        VERTEX["Vertex AI Model Garden<br/>(Gemini 1.5 Flash / Pro, Gemini 2.0)"]
-        BQ_TABLE["BigQuery Partitioned Table<br/>aleorg-dev-workload-01.genai_finops_governance"]
-        BQ_VIEWS["6 Analytical SQL Views<br/>(v_adk_executive_kpis, v_adk_user_leaderboard)"]
-    end
-
-    subgraph BI["4. Executive FinOps Dashboards"]
-        LOOKER["Looker Studio Executive Dashboard<br/>(Real-Time Scorecards & Drill-Down)"]
-        CHAT["Google Chat Proactive FinOps Alerts"]
-    end
-
-    USER ==>|Prompt Request| AGENT
-    AGENT --> RUNNER
-    RUNNER <==>|Inference & Token Metadata| VERTEX
-    RUNNER <==>|Autonomous Function Call| TOOL
-    RUNNER ==>|Live Telemetry Events| PLUGIN
-    PLUGIN ==>|Sub-Second Streaming| BQ_TABLE
-    BQ_TABLE --> BQ_VIEWS
-    BQ_VIEWS --> LOOKER
-    BQ_VIEWS -.-> CHAT
-```
+---
 
 ---
 
