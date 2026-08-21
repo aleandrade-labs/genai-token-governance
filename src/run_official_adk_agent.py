@@ -198,7 +198,7 @@ def record_looker_telemetry(user_id: str, app_code: str, cost_center: str, app_n
     except Exception as e:
         print(f"Notice: {e}")
 
-async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool = False):
+async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-flash", clear: bool = False, batch: bool = False):
     if clear:
         clear_bigquery_data()
         
@@ -226,7 +226,7 @@ async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool =
     )
     
     # 4. Create the Enterprise Agent with tools and model
-    llm = AltostratEnterpriseVertexLlm(model="gemini-1.5-flash", project_id=PROJECT_ID)
+    llm = AltostratEnterpriseVertexLlm(model=model_choice, project_id=PROJECT_ID)
     agent = Agent(
         name="smart_grid_assistant",
         model=llm,
@@ -271,12 +271,12 @@ async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool =
             app_code="cds-34242",
             cost_center="18207041",
             app_name="energy_watch_grid",
-            model_name="gemini-1.5-flash",
+            model_name=model_choice,
             prompt_tok=3420,
             out_tok=368,
             tool_name="query_substation_status"
         )
-        print(f"📊 Recorded live execution for `{active_user}` into BigQuery Looker Studio views.")
+        print(f"📊 Recorded live execution for `{active_user}` into BigQuery Looker Studio views ({model_choice}).")
         
         if batch:
             print(f"\n👥 Running Altostrat environment multi-service workload scenario...")
@@ -289,9 +289,9 @@ async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool =
                 (active_user, "cds-91023", "18207115", "substation_copilot", "gemini-2.0-flash", 6200, 750, "query_substation_telemetry")
             ]
             
-            for u_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name in scenarios:
-                print(f"   👤 Executed session for {u_id} ({app_name} | {model_name})")
-                record_looker_telemetry(u_id, app_code, cc, app_name, model_name, p_tok, o_tok, t_name)
+            for u_id, app_code, cc, a_name, m_name, p_tok, o_tok, t_name in scenarios:
+                print(f"   👤 Executed session for {u_id} ({a_name} | {m_name})")
+                record_looker_telemetry(u_id, app_code, cc, a_name, m_name, p_tok, o_tok, t_name)
                 
             print("✅ All Altostrat environment sessions recorded successfully!")
 
@@ -302,13 +302,23 @@ async def run_live_agent(user_id: str = None, clear: bool = False, batch: bool =
         print("\n📤 Flushing telemetry events to BigQuery Storage Write API...")
         await runner.close()
         print("🎉 SUCCESS: Real-time telemetry streamed directly to BigQuery dataset `genai_finops_governance`!")
-        print("👉 Go to Looker Studio and click 'Refresh data' to see the fresh live data on your screen!")
+        print("\n" + "=" * 75)
+        print("📊 LOOKER STUDIO CHART MAPPING REFERENCE:")
+        print("=" * 75)
+        print("• Top Scorecards   -> Table: `v_adk_executive_kpis` (or `v_genai_governance_dashboard`)")
+        print("• Model Donut      -> Table: `v_adk_model_distribution` (Dim: `model_name`, Metric: `total_tokens`)")
+        print("• User Leaderboard -> Table: `v_adk_user_leaderboard` (Dim: `user_id`, Metrics: `total_tokens`, `estimated_cost_usd`)")
+        print("• ERP Chargeback   -> Table: `v_adk_cost_center_attribution` (Dims: `cost_center`, `app_code`, Metrics: `total_tokens`, `allocated_cost_usd`)")
+        print("• Tool Analytics   -> Table: `v_adk_tool_analytics` (Dim: `tool_name`, Metric: `total_invocations`)")
+        print("=" * 75)
+        print("👉 Go to Looker Studio and click 'Refresh data' to update your dashboard!")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Official Google ADK Agent with BigQuery Analytics")
     parser.add_argument("--user", type=str, default=None, help="Caller email / identity (defaults to active gcloud account)")
+    parser.add_argument("--model", type=str, default="gemini-1.5-flash", choices=["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"], help="Gemini model to execute")
     parser.add_argument("--clear", action="store_true", help="Erase past BigQuery data before running")
     parser.add_argument("--batch", action="store_true", help="Run multi-workload scenario for Altostrat environment")
     
     args = parser.parse_args()
-    asyncio.run(run_live_agent(user_id=args.user, clear=args.clear, batch=args.batch))
+    asyncio.run(run_live_agent(user_id=args.user, model_choice=args.model, clear=args.clear, batch=args.batch))
