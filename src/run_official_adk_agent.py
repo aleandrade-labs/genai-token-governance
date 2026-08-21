@@ -131,8 +131,24 @@ def clear_bigquery_data():
             print(f"   ℹ️ Notice on `{tbl}`: {e}")
     print("✨ BigQuery is clean and ready for fresh AI agent executions!\n")
 
-def record_looker_telemetry(user_id: str, app_code: str, cost_center: str, app_name: str, model_name: str, prompt_tok: int, out_tok: int, tool_name: str = None):
-    """Writes clean structured telemetry directly to the Looker Studio datasource table."""
+def record_looker_telemetry(
+    user_id: str,
+    app_code: str,
+    cost_center: str,
+    app_name: str,
+    model_name: str,
+    prompt_tok: int,
+    out_tok: int,
+    tool_name: str = None,
+    owner: str = "arquitetura",
+    environment: str = "prod",
+    criticidade: str = "sim",
+    it_core: str = "nao",
+    equipe_do_servico: str = "pdi-ew",
+    gerencia_responsavel: str = "gerencia_de_sistemas",
+    business_owner: str = "raphael_cano"
+):
+    """Writes clean structured telemetry directly to the Looker Studio datasource table with all 10 Customer Policy Tags."""
     bq_client = bigquery.Client(project=PROJECT_ID)
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.{LOOKER_TABLE_ID}"
     
@@ -153,10 +169,18 @@ def record_looker_telemetry(user_id: str, app_code: str, cost_center: str, app_n
             "agent_name": f"{app_name}_agent",
             "model_name": model_name,
             "user_id": user_id,
+            # 🏷️ 10 Customer Policy Tags from CSV Mapping
+            "owner": owner,
             "cost_center": cost_center,
             "app_code": app_code,
             "app_name": app_name,
-            "environment": "prod",
+            "environment": environment,
+            "criticidade": criticidade,
+            "it_core": it_core,
+            "equipe_do_servico": equipe_do_servico,
+            "gerencia_responsavel": gerencia_responsavel,
+            "business_owner": business_owner,
+            # Token Telemetry
             "prompt_tokens": prompt_tok,
             "cached_tokens": int(prompt_tok * 0.4),
             "output_tokens": out_tok,
@@ -178,10 +202,18 @@ def record_looker_telemetry(user_id: str, app_code: str, cost_center: str, app_n
             "agent_name": f"{app_name}_agent",
             "model_name": model_name,
             "user_id": user_id,
+            # 🏷️ 10 Customer Policy Tags from CSV Mapping
+            "owner": owner,
             "cost_center": cost_center,
             "app_code": app_code,
             "app_name": app_name,
-            "environment": "prod",
+            "environment": environment,
+            "criticidade": criticidade,
+            "it_core": it_core,
+            "equipe_do_servico": equipe_do_servico,
+            "gerencia_responsavel": gerencia_responsavel,
+            "business_owner": business_owner,
+            # Token Telemetry
             "prompt_tokens": 0,
             "cached_tokens": 0,
             "output_tokens": 0,
@@ -208,7 +240,7 @@ async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-fl
     print("🤖 OFFICIAL GOOGLE ADK BIGQUERY AGENT ANALYTICS (adk.dev)")
     print("=" * 75)
     
-    # 3. Instantiate the official BigQueryAgentAnalyticsPlugin
+    # 3. Instantiate the official BigQueryAgentAnalyticsPlugin with Customer Policy Tags
     print(f"\n📦 Initializing BigQueryAgentAnalyticsPlugin for `{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}`...")
     plugin = BigQueryAgentAnalyticsPlugin(
         project_id=PROJECT_ID,
@@ -221,7 +253,20 @@ async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-fl
             shutdown_timeout=5.0,
             auto_schema_upgrade=True,  # Automatically evolves BigQuery schema
             create_views=True,         # Auto-generates flat analytical views
-            view_prefix="v_adk_official"
+            view_prefix="v_adk_official",
+            # 🏷️ Official Customer Policy Tags attached to every ADK event in BigQuery
+            custom_tags={
+                "owner": "arquitetura",
+                "cost_center": "18207041",
+                "app_code": "cds-34242",
+                "application": "energy_watch",
+                "environment": "prod",
+                "criticidade": "sim",
+                "it_core": "nao",
+                "equipe_do_servico": "pdi-ew",
+                "gerencia_responsavel": "gerencia_de_sistemas",
+                "business_owner": "raphael_cano",
+            }
         )
     )
     
@@ -265,7 +310,7 @@ async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-fl
                         print(p.text)
         print("=" * 75)
         
-        # Log to Looker datasource
+        # Log to Looker datasource with Customer Policy Tags
         record_looker_telemetry(
             user_id=active_user,
             app_code="cds-34242",
@@ -274,26 +319,50 @@ async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-fl
             model_name=model_choice,
             prompt_tok=3420,
             out_tok=368,
-            tool_name="query_substation_status"
+            tool_name="query_substation_status",
+            owner="arquitetura",
+            environment="prod",
+            criticidade="sim",
+            it_core="nao",
+            equipe_do_servico="pdi-ew",
+            gerencia_responsavel="gerencia_de_sistemas",
+            business_owner="raphael_cano"
         )
         print(f"📊 Recorded live execution for `{active_user}` into BigQuery Looker Studio views ({model_choice}).")
         
         if batch:
             print(f"\n👥 Running Altostrat environment multi-service workload scenario...")
             
-            # Altostrat environment accounts
+            # Scenarios with full Customer Policy Tags from customer_policy_tags.csv
             scenarios = [
-                (active_user, "cds-34199", "18207243", "attendance_sac", "gemini-1.5-flash", 5400, 480, "search_customer_history"),
-                ("alexandrade@google.com", "cds-59339", "12272260", "conexao_silvestre_pd", "gemini-1.5-pro", 8200, 1100, "calculate_feeder_loss"),
-                ("sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "cds-77211", "18206922", "smart_meter_rag", "gemini-1.5-flash", 4100, 320, "check_smart_meter_billing_anomaly"),
-                (active_user, "cds-91023", "18207115", "substation_copilot", "gemini-2.0-flash", 6200, 750, "query_substation_telemetry")
+                # (user_id, app_code, cc, app_name, model_name, p_tok, o_tok, tool_name, owner, env, crit, it_core, equipe, gerencia, b_owner)
+                (active_user, "cds-34199", "18207243", "attendance_sac", "gemini-1.5-flash", 5400, 480, "search_customer_history", "arquitetura", "prod", "nao", "nao", "equipe_attendance", "gerencia_de_transformacao_digital", "definir"),
+                ("alexandrade@google.com", "cds-59339", "12272260", "conexao_silvestre_pd", "gemini-1.5-pro", 8200, 1100, "calculate_feeder_loss", "pdi", "prod", "nao", "nao", "equipe_pdi_conexao_silvestre", "coordenacao_projetos_pdi", "alexandrade"),
+                ("sa-finops-label-governance@aleorg-dev-workload-01.iam.gserviceaccount.com", "cds-77211", "18206922", "smart_meter_rag", "gemini-1.5-flash", 4100, 320, "check_smart_meter_billing_anomaly", "sistemas", "prod", "nao", "nao", "equipe_smartreader", "gerencia_de_sistemas", "raphael_cano"),
+                (active_user, "cds-91023", "18207115", "substation_copilot", "gemini-2.0-flash", 6200, 750, "query_substation_telemetry", "arquitetura", "prod", "sim", "sim", "equipe_transformacao_digital", "gerencia_de_transformacao_digital", "antonio_lameirao")
             ]
             
-            for u_id, app_code, cc, a_name, m_name, p_tok, o_tok, t_name in scenarios:
+            for u_id, app_code, cc, a_name, m_name, p_tok, o_tok, t_name, ow, env, crit, it_c, eq, ger, b_ow in scenarios:
                 print(f"   👤 Executed session for {u_id} ({a_name} | {m_name})")
-                record_looker_telemetry(u_id, app_code, cc, a_name, m_name, p_tok, o_tok, t_name)
+                record_looker_telemetry(
+                    user_id=u_id,
+                    app_code=app_code,
+                    cost_center=cc,
+                    app_name=a_name,
+                    model_name=m_name,
+                    prompt_tok=p_tok,
+                    out_tok=o_tok,
+                    tool_name=t_name,
+                    owner=ow,
+                    environment=env,
+                    criticidade=crit,
+                    it_core=it_c,
+                    equipe_do_servico=eq,
+                    gerencia_responsavel=ger,
+                    business_owner=b_ow
+                )
                 
-            print("✅ All Altostrat environment sessions recorded successfully!")
+            print("✅ All Altostrat environment sessions recorded successfully with full Customer Policy Tags!")
 
     except Exception as e:
         print(f"ℹ️ Agent Notice: {e}")

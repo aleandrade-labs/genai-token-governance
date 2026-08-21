@@ -4,7 +4,50 @@
 -- Table: `agent_events` (Native ADK BigQuery Storage Write API Table)
 -- ==============================================================================
 
--- 1. View: Executive Scorecard KPIs
+-- 1. View: Master Unified Dashboard View (Contains All 10 Customer Policy Tags)
+CREATE OR REPLACE VIEW `genai_finops_governance.v_genai_governance_dashboard` AS
+SELECT
+  timestamp,
+  DATE(timestamp) AS usage_date,
+  session_id,
+  user_id,
+  -- 🏷️ 10 Customer Policy Tags from CSV Mapping
+  COALESCE(owner, "arquitetura") AS owner,
+  CAST(cost_center AS STRING) AS cost_center,
+  app_code,
+  app_name AS application,
+  environment,
+  COALESCE(criticidade, "sim") AS criticidade,
+  COALESCE(it_core, "nao") AS it_core,
+  COALESCE(equipe_do_servico, "equipe_transformacao_digital") AS equipe_do_servico,
+  COALESCE(gerencia_responsavel, "gerencia_de_transformacao_digital") AS gerencia_responsavel,
+  COALESCE(business_owner, "raphael_cano") AS business_owner,
+  -- Agent & Model Metadata
+  agent_name,
+  model_name,
+  event_type,
+  tool_name,
+  status,
+  latency_ms,
+  -- Token Metrics
+  COALESCE(prompt_tokens, 0) AS prompt_tokens,
+  COALESCE(cached_tokens, 0) AS cached_tokens,
+  COALESCE(output_tokens, 0) AS output_tokens,
+  COALESCE(total_tokens, 0) AS total_tokens,
+  ROUND(
+    CASE 
+      WHEN LOWER(model_name) LIKE '%flash%' 
+        THEN (COALESCE(prompt_tokens, 0) * 0.00001875 / 1000) + 
+             (COALESCE(output_tokens, 0) * 0.000075 / 1000)
+      WHEN LOWER(model_name) LIKE '%pro%' 
+        THEN (COALESCE(prompt_tokens, 0) * 0.00125 / 1000) + 
+             (COALESCE(output_tokens, 0) * 0.00375 / 1000)
+      ELSE (COALESCE(total_tokens, 0) * 0.000025 / 1000)
+    END, 4
+  ) AS estimated_cost_usd
+FROM `genai_finops_governance.agent_events`;
+
+-- 2. View: Executive Scorecard KPIs
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_executive_kpis` AS
 SELECT
   COUNT(DISTINCT session_id) AS total_agent_sessions,
@@ -16,7 +59,6 @@ SELECT
   SUM(COALESCE(cached_tokens, 0)) AS total_cached_tokens,
   SUM(COALESCE(output_tokens, 0)) AS total_output_tokens,
   SUM(COALESCE(total_tokens, 0)) AS grand_total_tokens,
-  -- Estimated financial cost in USD
   ROUND(
     SUM(
       CASE 
@@ -32,13 +74,14 @@ SELECT
   ) AS total_estimated_cost_usd
 FROM `genai_finops_governance.agent_events`;
 
--- 2. View: User / Caller Token Leaderboard
+-- 3. View: User / Caller Token Leaderboard
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_user_leaderboard` AS
 SELECT
   user_id,
   cost_center,
   app_code,
   app_name,
+  owner,
   COUNT(DISTINCT session_id) AS active_sessions,
   SUM(prompt_tokens) AS prompt_tokens,
   SUM(cached_tokens) AS cached_tokens,
@@ -59,10 +102,10 @@ SELECT
   ) AS estimated_cost_usd
 FROM `genai_finops_governance.agent_events`
 WHERE event_type = 'LLM_RESPONSE'
-GROUP BY user_id, cost_center, app_code, app_name
+GROUP BY user_id, cost_center, app_code, app_name, owner
 ORDER BY total_tokens DESC;
 
--- 3. View: Model Family Unit Economics & Share
+-- 4. View: Model Family Unit Economics & Share
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_model_distribution` AS
 SELECT
   model_name,
@@ -89,13 +132,19 @@ WHERE event_type = 'LLM_RESPONSE'
 GROUP BY model_name
 ORDER BY total_tokens DESC;
 
--- 4. View: SAP Cost Center & Application Code Financial Chargeback
+-- 5. View: SAP Cost Center & Application Code Financial Chargeback
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_cost_center_attribution` AS
 SELECT
   cost_center,
   app_code,
   app_name,
   environment,
+  owner,
+  criticidade,
+  it_core,
+  equipe_do_servico,
+  gerencia_responsavel,
+  business_owner,
   COUNT(DISTINCT session_id) AS total_sessions,
   SUM(total_tokens) AS total_tokens,
   ROUND(
@@ -113,10 +162,10 @@ SELECT
   ) AS allocated_cost_usd
 FROM `genai_finops_governance.agent_events`
 WHERE event_type = 'LLM_RESPONSE'
-GROUP BY cost_center, app_code, app_name, environment
+GROUP BY cost_center, app_code, app_name, environment, owner, criticidade, it_core, equipe_do_servico, gerencia_responsavel, business_owner
 ORDER BY allocated_cost_usd DESC;
 
--- 5. View: Tool Invocations & Performance Diagnostics
+-- 6. View: Tool Invocations & Performance Diagnostics
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_tool_analytics` AS
 SELECT
   tool_name,
@@ -131,7 +180,7 @@ WHERE event_type = 'TOOL_COMPLETED' AND tool_name IS NOT NULL
 GROUP BY tool_name
 ORDER BY total_invocations DESC;
 
--- 6. View: Daily Compliance & Token Consumption Trend
+-- 7. View: Daily Compliance & Token Consumption Trend
 CREATE OR REPLACE VIEW `genai_finops_governance.v_adk_daily_trend` AS
 SELECT
   DATE(CAST(timestamp AS TIMESTAMP)) AS usage_date,
