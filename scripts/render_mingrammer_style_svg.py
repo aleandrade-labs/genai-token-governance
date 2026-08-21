@@ -1,6 +1,9 @@
 """
 Generates the crystal-clear official Google Cloud Mingrammer-style Architecture Diagram for GenAI Token Governance.
-Features authentic Google Cloud service icons, sharp typography, white canvas, and precise vector lines.
+Features:
+- Perfectly spaced Vertex AI model nodes (no overlapping text)
+- Independent orthogonal routing channels (zero line overlapping / crossing)
+- Authentic Google Cloud service icons and clean typography
 """
 import os
 
@@ -131,22 +134,25 @@ def render_genai_governance_mingrammer_svg(output_path: str):
   <rect x="340" y="98" width="270" height="24" rx="6" fill="#e6f4ea" />
   <text x="475" y="115" fill="#1e8e3e" font-size="13" font-weight="700" text-anchor="middle">2. Google ADK Runtime Engine (adk.dev)</text>
 
+  <!-- Node: ADK Agent -->
   <g transform="translate(370, 170)" filter="url(#iconShadow)">
     <use href="#icon-adk" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Google ADK Agent</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">smart_grid_assistant</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">smart_grid_assistant</text>
   </g>
 
-  <g transform="translate(510, 170)" filter="url(#iconShadow)">
+  <!-- Node: SCADA Tool -->
+  <g transform="translate(515, 170)" filter="url(#iconShadow)">
     <use href="#icon-scada" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">SCADA Tool</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">query_substation_status</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">query_substation</text>
   </g>
 
+  <!-- Node: BigQuery Plugin -->
   <g transform="translate(443, 350)" filter="url(#iconShadow)">
     <use href="#icon-plugin" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">ADK BigQuery Plugin</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">BigQueryAgentAnalyticsPlugin</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">BigQueryAgentAnalytics</text>
   </g>
 
   <rect x="345" y="500" width="260" height="150" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
@@ -163,16 +169,18 @@ def render_genai_governance_mingrammer_svg(output_path: str):
   <rect x="700" y="98" width="250" height="24" rx="6" fill="#fce8e6" />
   <text x="825" y="115" fill="#d93025" font-size="13" font-weight="700" text-anchor="middle">3. Vertex AI Model Garden</text>
 
-  <g transform="translate(740, 170)" filter="url(#iconShadow)">
+  <!-- Node: Flash (well-separated) -->
+  <g transform="translate(725, 170)" filter="url(#iconShadow)">
     <use href="#icon-vertex" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Gemini 1.5 &amp; 2.0 Flash</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">Sub-Second Dispatch</text>
+    <text x="32" y="82" fill="#202124" font-size="12.5" font-weight="700" text-anchor="middle">Gemini Flash</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11" text-anchor="middle">1.5 / 2.0 Fast</text>
   </g>
 
-  <g transform="translate(860, 170)" filter="url(#iconShadow)">
+  <!-- Node: Pro (well-separated) -->
+  <g transform="translate(865, 170)" filter="url(#iconShadow)">
     <use href="#icon-vertex" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Gemini 1.5 Pro</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">Complex RAG Reasoning</text>
+    <text x="32" y="82" fill="#202124" font-size="12.5" font-weight="700" text-anchor="middle">Gemini Pro</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11" text-anchor="middle">1.5 Complex RAG</text>
   </g>
 
   <rect x="700" y="300" width="250" height="85" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
@@ -204,14 +212,12 @@ def render_genai_governance_mingrammer_svg(output_path: str):
   <rect x="1040" y="98" width="240" height="24" rx="6" fill="#fef7e0" />
   <text x="1160" y="115" fill="#b06000" font-size="13" font-weight="700" text-anchor="middle">5. Visual BI &amp; Alerts</text>
 
-  <!-- Node: Looker Studio -->
   <g transform="translate(1128, 170)" filter="url(#iconShadow)">
     <use href="#icon-looker" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Looker Studio</text>
     <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">Executive Dashboard</text>
   </g>
 
-  <!-- Node: Google Chat -->
   <g transform="translate(1128, 360)" filter="url(#iconShadow)">
     <use href="#icon-chat" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Google Chat</text>
@@ -226,36 +232,36 @@ def render_genai_governance_mingrammer_svg(output_path: str):
   <text x="1055" y="607" fill="#3c4043" font-size="11.5">• SAP Cost Center Chargeback</text>
   <text x="1055" y="628" fill="#1e8e3e" font-size="12" font-weight="700">Real-Time Refresh Enabled</text>
 
-  <!-- ==================== FLOW ARROWS (fill="none") ==================== -->
+  <!-- ==================== FLOW ARROWS (CLEAN INDEPENDENT CHANNELS) ==================== -->
 
-  <!-- User to ADK Agent -->
+  <!-- User Inbound Prompts (Blue) -->
   <path d="M 192 202 L 370 202" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
-  <path d="M 192 392 L 290 392 L 290 220 L 370 220" fill="none" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)" />
+  <path d="M 192 392 L 280 392 L 280 220 L 370 220" fill="none" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)" />
 
-  <!-- ADK Agent to SCADA Tool -->
-  <path d="M 434 202 L 510 202" fill="none" stroke="#f9ab00" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowYellow)" />
+  <!-- ADK Agent to SCADA Tool (Yellow Dashed) -->
+  <path d="M 434 202 L 515 202" fill="none" stroke="#f9ab00" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowYellow)" />
 
-  <!-- ADK Agent to Vertex AI -->
-  <path d="M 434 185 L 600 185 L 600 140 L 740 185" fill="none" stroke="#d93025" stroke-width="2.5" marker-end="url(#arrowRed)" />
+  <!-- ADK Agent to Vertex AI (Red Overhead Arc) -->
+  <path d="M 402 170 L 402 145 L 757 145 L 757 170" fill="none" stroke="#d93025" stroke-width="2.5" marker-end="url(#arrowRed)" />
 
-  <!-- ADK Agent to BigQuery Plugin -->
-  <path d="M 402 245 L 402 382 L 443 382" fill="none" stroke="#1e8e3e" stroke-width="3" marker-end="url(#arrowGreen)" />
+  <!-- ADK Agent to BigQuery Plugin (Green Direct Vertical) -->
+  <path d="M 475 234 L 475 350" fill="none" stroke="#1e8e3e" stroke-width="2.5" marker-end="url(#arrowGreen)" />
 
-  <!-- BigQuery Plugin to BigQuery Table -->
-  <path d="M 507 382 L 650 382 L 650 542 L 793 542" fill="none" stroke="#1a73e8" stroke-width="3" marker-end="url(#arrowBlue)" />
+  <!-- BigQuery Plugin to BigQuery Table (Blue Down-and-Right) -->
+  <path d="M 507 382 L 650 382 L 650 542 L 793 542" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
 
-  <!-- BigQuery to Looker Studio -->
-  <path d="M 857 542 L 1000 542 L 1000 202 L 1128 202" fill="none" stroke="#f9ab00" stroke-width="2.5" marker-end="url(#arrowYellow)" />
+  <!-- CHANNEL A: BigQuery to Looker Studio (Orange - Channel at x=990) -->
+  <path d="M 857 530 L 990 530 L 990 202 L 1128 202" fill="none" stroke="#f9ab00" stroke-width="2.5" marker-end="url(#arrowYellow)" />
 
-  <!-- BigQuery to Google Chat -->
-  <path d="M 857 560 L 1000 560 L 1000 392 L 1128 392" fill="none" stroke="#1e8e3e" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowGreen)" />
+  <!-- CHANNEL B: BigQuery to Google Chat (Green Dashed - Channel at x=1010, ZERO OVERLAP) -->
+  <path d="M 857 560 L 1010 560 L 1010 392 L 1128 392" fill="none" stroke="#1e8e3e" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowGreen)" />
 
 </svg>
 """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(svg)
-    print(f"✅ Enhanced Vector SVG: {output_path}")
+    print(f"✅ Rendered Clean Routing Diagram: {output_path}")
 
 if __name__ == "__main__":
     render_genai_governance_mingrammer_svg("/Users/alexandrade/codes/catlab/light/genai-token-governance/docs/architecture_genai_governance.svg")
