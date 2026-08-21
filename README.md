@@ -39,9 +39,13 @@ By integrating the official **`BigQueryAgentAnalyticsPlugin`** from the [Google 
 
 ## 🏗️ 2. End-to-End Architecture
 
+<p align="center">
+  <img src="docs/architecture_genai_governance.svg" alt="Google Cloud FinOps — GenAI Token & Cost Governance Architecture" width="100%" />
+</p>
+
 ```mermaid
 flowchart TD
-    subgraph CALLERS["1. Enterprise AI Callers & Agents"]
+    subgraph CALLERS["1. Authenticated Callers & Enterprise Users"]
         USER["Authenticated User<br/>(admin@alexandrade.altostrat.com)"]
         AGENT["Google ADK Agent<br/>(smart_grid_assistant)"]
         TOOL["SCADA / CRM Tool<br/>(query_substation_status)"]
