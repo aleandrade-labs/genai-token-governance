@@ -1,8 +1,10 @@
 """
 Generates the crystal-clear official Google Cloud Mingrammer-style Architecture Diagram for GenAI Token Governance.
 Features:
-- Perfectly spaced Vertex AI model nodes (no overlapping text)
-- Independent orthogonal routing channels (zero line overlapping / crossing)
+- Live Multi-Model Tiering (Gemini 2.5 Pro, Gemini 2.5 Flash, Gemini 2.5 Flash-Lite)
+- Strategic AI Value Transformation (`qualificado_como`, `valor`, `budget_usd`)
+- 10 Customer Policy Tags from SAP ERP
+- Independent orthogonal routing channels (zero line overlapping)
 - Authentic Google Cloud service icons and clean typography
 """
 import os
@@ -90,178 +92,178 @@ def render_genai_governance_mingrammer_svg(output_path: str):
       <rect x="29" y="24" width="7" height="26" rx="2" fill="#ea4335" />
       <rect x="40" y="16" width="7" height="34" rx="2" fill="#34a853" />
     </g>
-
-    <g id="icon-chat">
-      <rect width="64" height="64" rx="14" fill="#e6f4ea" />
-      <path d="M 18 20 C 18 16 46 16 46 20 L 46 38 C 46 42 36 42 32 46 L 26 42 L 18 42 Z" fill="#1e8e3e" />
-      <circle cx="26" cy="29" r="2.5" fill="#ffffff" />
-      <circle cx="32" cy="29" r="2.5" fill="#ffffff" />
-      <circle cx="38" cy="29" r="2.5" fill="#ffffff" />
-    </g>
   </defs>
 
   <!-- Header -->
-  <text x="50" y="50" fill="#202124" font-size="24" font-weight="700">Google Cloud FinOps — GenAI Token &amp; Cost Governance Architecture</text>
-  <text x="50" y="78" fill="#5f6368" font-size="14">Official Google ADK BigQuery Agent Analytics Integration (adk.dev • Storage Write API • Zero API Keys)</text>
+  <text x="50" y="50" fill="#202124" font-size="24" font-weight="700">Google Cloud FinOps — GenAI Token Governance &amp; AI Value Transformation</text>
+  <text x="50" y="78" fill="#5f6368" font-size="14">Official Google ADK &amp; Vertex AI BigQuery Streaming (Storage Write API • Zero API Keys • Real Token Ingestion)</text>
 
-  <!-- Cluster 1: Authenticated Callers -->
-  <rect x="50" y="110" width="220" height="660" rx="12" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5" stroke-dasharray="4,4" />
-  <rect x="70" y="98" width="180" height="24" rx="6" fill="#e8eaed" />
-  <text x="160" y="115" fill="#3c4043" font-size="13" font-weight="700" text-anchor="middle">1. Authenticated Callers</text>
+  <!-- Cluster 1: Authenticated Callers & Enterprise Agents -->
+  <rect x="50" y="110" width="230" height="660" rx="12" fill="#f8f9fa" stroke="#dadce0" stroke-width="1.5" stroke-dasharray="4,4" />
+  <rect x="65" y="98" width="200" height="24" rx="6" fill="#e8eaed" />
+  <text x="165" y="115" fill="#3c4043" font-size="13" font-weight="700" text-anchor="middle">1. Transformation Agents</text>
 
-  <g transform="translate(128, 170)" filter="url(#iconShadow)">
+  <g transform="translate(133, 160)" filter="url(#iconShadow)">
     <use href="#icon-user" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Admin User</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">admin@altostrat.com</text>
+    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Business Users</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">lucia@, evandro@, senna@</text>
   </g>
 
-  <g transform="translate(128, 360)" filter="url(#iconShadow)">
-    <use href="#icon-user" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Enterprise Workloads</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">SAC, Grid, P&amp;D Callers</text>
+  <g transform="translate(133, 330)" filter="url(#iconShadow)">
+    <use href="#icon-adk" />
+    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">11 Enterprise Agents</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">Vendas, Jurídico, IT, Ops</text>
   </g>
 
-  <rect x="70" y="520" width="180" height="115" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
-  <text x="80" y="545" fill="#1a73e8" font-size="12" font-weight="700">Identity Context:</text>
-  <text x="80" y="566" fill="#3c4043" font-size="11">• Google Cloud ADC Auth</text>
-  <text x="80" y="585" fill="#3c4043" font-size="11">• Quota Project Enforced</text>
-  <text x="80" y="604" fill="#3c4043" font-size="11">• SAP Cost Centers</text>
-  <text x="80" y="624" fill="#1e8e3e" font-size="11.5" font-weight="700">Zero API Keys Required</text>
+  <rect x="65" y="490" width="200" height="155" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
+  <text x="78" y="515" fill="#1a73e8" font-size="12" font-weight="700">Strategic &amp; SAP Labels:</text>
+  <text x="78" y="536" fill="#3c4043" font-size="11">• qualificado_como (Receita/Core)</text>
+  <text x="78" y="555" fill="#3c4043" font-size="11">• valor (Alto vs Baixo)</text>
+  <text x="78" y="574" fill="#3c4043" font-size="11">• budget_usd (Dept Budget)</text>
+  <text x="78" y="593" fill="#3c4043" font-size="11">• 10 SAP Customer Tags</text>
+  <text x="78" y="612" fill="#3c4043" font-size="11">• Google Cloud ADC IAM Auth</text>
+  <text x="78" y="632" fill="#1e8e3e" font-size="11.5" font-weight="700">Zero API Keys Required</text>
 
 
   <!-- Cluster 2: Google ADK Engine -->
-  <rect x="320" y="110" width="310" height="660" rx="12" fill="#f8f9fa" stroke="#1e8e3e" stroke-width="1.5" stroke-dasharray="4,4" />
-  <rect x="340" y="98" width="270" height="24" rx="6" fill="#e6f4ea" />
-  <text x="475" y="115" fill="#1e8e3e" font-size="13" font-weight="700" text-anchor="middle">2. Google ADK Runtime Engine (adk.dev)</text>
+  <rect x="310" y="110" width="310" height="660" rx="12" fill="#f8f9fa" stroke="#1e8e3e" stroke-width="1.5" stroke-dasharray="4,4" />
+  <rect x="330" y="98" width="270" height="24" rx="6" fill="#e6f4ea" />
+  <text x="465" y="115" fill="#1e8e3e" font-size="13" font-weight="700" text-anchor="middle">2. Google ADK Runtime Engine (adk.dev)</text>
 
   <!-- Node: ADK Agent -->
-  <g transform="translate(370, 170)" filter="url(#iconShadow)">
+  <g transform="translate(355, 160)" filter="url(#iconShadow)">
     <use href="#icon-adk" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Google ADK Agent</text>
-    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">smart_grid_assistant</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">Multi-Agent Runner</text>
   </g>
 
   <!-- Node: SCADA Tool -->
-  <g transform="translate(515, 170)" filter="url(#iconShadow)">
+  <g transform="translate(505, 160)" filter="url(#iconShadow)">
     <use href="#icon-scada" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">SCADA Tool</text>
-    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">query_substation</text>
+    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Autonomous Tools</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">SCADA, SAP, Legal</text>
   </g>
 
   <!-- Node: BigQuery Plugin -->
-  <g transform="translate(443, 350)" filter="url(#iconShadow)">
+  <g transform="translate(433, 330)" filter="url(#iconShadow)">
     <use href="#icon-plugin" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">ADK BigQuery Plugin</text>
     <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">BigQueryAgentAnalytics</text>
   </g>
 
-  <rect x="345" y="500" width="260" height="150" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
-  <text x="360" y="525" fill="#1e8e3e" font-size="12" font-weight="700">Official ADK Capabilities:</text>
-  <text x="360" y="547" fill="#3c4043" font-size="11.5">• Multi-Turn InMemoryRunner</text>
-  <text x="360" y="567" fill="#3c4043" font-size="11.5">• Autonomous Tool Calling</text>
-  <text x="360" y="587" fill="#3c4043" font-size="11.5">• gRPC Storage Write API</text>
-  <text x="360" y="607" fill="#3c4043" font-size="11.5">• Sub-Second Streaming (&lt; 1s)</text>
-  <text x="360" y="628" fill="#1a73e8" font-size="12" font-weight="700">Live Telemetry Ingestion</text>
+  <rect x="335" y="490" width="260" height="155" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
+  <text x="350" y="515" fill="#1e8e3e" font-size="12" font-weight="700">Real-Time Ingestion Engine:</text>
+  <text x="350" y="537" fill="#3c4043" font-size="11.5">• Multi-Turn Agent Reasoning</text>
+  <text x="350" y="557" fill="#3c4043" font-size="11.5">• Autonomous Tool Telemetry</text>
+  <text x="350" y="577" fill="#3c4043" font-size="11.5">• gRPC Storage Write API</text>
+  <text x="350" y="597" fill="#3c4043" font-size="11.5">• Sub-Second Streaming (&lt; 1s)</text>
+  <text x="350" y="617" fill="#3c4043" font-size="11.5">• Injects 10 Customer Policy Tags</text>
+  <text x="350" y="637" fill="#1a73e8" font-size="12" font-weight="700">100% Real Usage Metadata</text>
 
 
   <!-- Cluster 3: Vertex AI Model Garden -->
-  <rect x="680" y="110" width="290" height="310" rx="12" fill="#f8f9fa" stroke="#d93025" stroke-width="1.5" stroke-dasharray="4,4" />
-  <rect x="700" y="98" width="250" height="24" rx="6" fill="#fce8e6" />
-  <text x="825" y="115" fill="#d93025" font-size="13" font-weight="700" text-anchor="middle">3. Vertex AI Model Garden</text>
+  <rect x="650" y="110" width="340" height="310" rx="12" fill="#f8f9fa" stroke="#d93025" stroke-width="1.5" stroke-dasharray="4,4" />
+  <rect x="670" y="98" width="300" height="24" rx="6" fill="#fce8e6" />
+  <text x="820" y="115" fill="#d93025" font-size="13" font-weight="700" text-anchor="middle">3. Google Vertex AI Model Garden</text>
 
-  <!-- Node: Flash (well-separated) -->
-  <g transform="translate(725, 170)" filter="url(#iconShadow)">
+  <!-- Node: Pro (Reasoning) -->
+  <g transform="translate(680, 160)" filter="url(#iconShadow)">
     <use href="#icon-vertex" />
-    <text x="32" y="82" fill="#202124" font-size="12.5" font-weight="700" text-anchor="middle">Gemini Flash</text>
-    <text x="32" y="98" fill="#5f6368" font-size="11" text-anchor="middle">1.5 / 2.0 Fast</text>
+    <text x="32" y="82" fill="#202124" font-size="12" font-weight="700" text-anchor="middle">Gemini 2.5 Pro</text>
+    <text x="32" y="98" fill="#5f6368" font-size="10.5" text-anchor="middle">Deep Reasoning</text>
   </g>
 
-  <!-- Node: Pro (well-separated) -->
-  <g transform="translate(865, 170)" filter="url(#iconShadow)">
+  <!-- Node: Flash (Standard) -->
+  <g transform="translate(785, 160)" filter="url(#iconShadow)">
     <use href="#icon-vertex" />
-    <text x="32" y="82" fill="#202124" font-size="12.5" font-weight="700" text-anchor="middle">Gemini Pro</text>
-    <text x="32" y="98" fill="#5f6368" font-size="11" text-anchor="middle">1.5 Complex RAG</text>
+    <text x="32" y="82" fill="#202124" font-size="12" font-weight="700" text-anchor="middle">Gemini 2.5 Flash</text>
+    <text x="32" y="98" fill="#5f6368" font-size="10.5" text-anchor="middle">Standard Speed</text>
   </g>
 
-  <rect x="700" y="300" width="250" height="85" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
-  <text x="715" y="325" fill="#d93025" font-size="12" font-weight="700">Token Metrics Emitted:</text>
-  <text x="715" y="347" fill="#3c4043" font-size="11.5">• prompt_token_count (Inbound)</text>
-  <text x="715" y="367" fill="#3c4043" font-size="11.5">• candidates_token_count (Outbound)</text>
+  <!-- Node: Flash-Lite -->
+  <g transform="translate(895, 160)" filter="url(#iconShadow)">
+    <use href="#icon-vertex" />
+    <text x="32" y="82" fill="#202124" font-size="12" font-weight="700" text-anchor="middle">Flash-Lite</text>
+    <text x="32" y="98" fill="#5f6368" font-size="10.5" text-anchor="middle">High Throughput</text>
+  </g>
+
+  <rect x="670" y="295" width="300" height="95" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
+  <text x="685" y="320" fill="#d93025" font-size="12" font-weight="700">Real Usage Metadata Emitted:</text>
+  <text x="685" y="342" fill="#3c4043" font-size="11.5">• prompt_token_count (Inbound)</text>
+  <text x="685" y="362" fill="#3c4043" font-size="11.5">• candidates_token_count (Outbound)</text>
+  <text x="685" y="382" fill="#3c4043" font-size="11.5">• thoughts_token_count (Reasoning)</text>
 
 
-  <!-- Cluster 4: BigQuery Analytics -->
-  <rect x="680" y="460" width="290" height="310" rx="12" fill="#f8f9fa" stroke="#1a73e8" stroke-width="1.5" stroke-dasharray="4,4" />
-  <rect x="700" y="448" width="250" height="24" rx="6" fill="#e8f0fe" />
-  <text x="825" y="465" fill="#1a73e8" font-size="13" font-weight="700" text-anchor="middle">4. BigQuery Analytics</text>
+  <!-- Cluster 4: BigQuery Analytics & Views -->
+  <rect x="650" y="460" width="340" height="310" rx="12" fill="#f8f9fa" stroke="#1a73e8" stroke-width="1.5" stroke-dasharray="4,4" />
+  <rect x="670" y="448" width="300" height="24" rx="6" fill="#e8f0fe" />
+  <text x="820" y="465" fill="#1a73e8" font-size="13" font-weight="700" text-anchor="middle">4. BigQuery Analytics &amp; Views</text>
 
-  <g transform="translate(793, 510)" filter="url(#iconShadow)">
+  <g transform="translate(788, 500)" filter="url(#iconShadow)">
     <use href="#icon-bigquery" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">BigQuery Telemetry</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">genai_finops_governance</text>
+    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">BigQuery Storage</text>
+    <text x="32" y="98" fill="#5f6368" font-size="11.5" text-anchor="middle">genai_finops_governance</text>
   </g>
 
-  <rect x="700" y="630" width="250" height="110" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
-  <text x="715" y="655" fill="#1a73e8" font-size="12" font-weight="700">6 Analytical Views Provisioned:</text>
-  <text x="715" y="678" fill="#3c4043" font-size="11.5">• v_adk_executive_kpis</text>
-  <text x="715" y="698" fill="#3c4043" font-size="11.5">• v_adk_user_leaderboard</text>
-  <text x="715" y="718" fill="#3c4043" font-size="11.5">• v_adk_model_distribution</text>
+  <rect x="670" y="620" width="300" height="125" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
+  <text x="685" y="645" fill="#1a73e8" font-size="12" font-weight="700">Analytical Views Provisioned:</text>
+  <text x="685" y="668" fill="#3c4043" font-size="11">• v_genai_governance_dashboard (10 Tags)</text>
+  <text x="685" y="688" fill="#3c4043" font-size="11">• v_value_transformation_dashboard</text>
+  <text x="685" y="708" fill="#3c4043" font-size="11">• v_adk_user_leaderboard &amp; Model Share</text>
+  <text x="685" y="728" fill="#1e8e3e" font-size="11.5" font-weight="700">Dynamic SQL Formulas ($/1M Tokens)</text>
 
 
-  <!-- Cluster 5: Dashboards & Alerts -->
+  <!-- Cluster 5: Looker Studio Cockpit -->
   <rect x="1020" y="110" width="280" height="660" rx="12" fill="#f8f9fa" stroke="#f9ab00" stroke-width="1.5" stroke-dasharray="4,4" />
   <rect x="1040" y="98" width="240" height="24" rx="6" fill="#fef7e0" />
-  <text x="1160" y="115" fill="#b06000" font-size="13" font-weight="700" text-anchor="middle">5. Visual BI &amp; Alerts</text>
+  <text x="1160" y="115" fill="#b06000" font-size="13" font-weight="700" text-anchor="middle">5. Executive Looker Cockpit</text>
 
-  <g transform="translate(1128, 170)" filter="url(#iconShadow)">
+  <g transform="translate(1128, 160)" filter="url(#iconShadow)">
     <use href="#icon-looker" />
     <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Looker Studio</text>
     <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">Executive Dashboard</text>
   </g>
 
-  <g transform="translate(1128, 360)" filter="url(#iconShadow)">
-    <use href="#icon-chat" />
-    <text x="32" y="82" fill="#202124" font-size="13" font-weight="700" text-anchor="middle">Google Chat</text>
-    <text x="32" y="98" fill="#5f6368" font-size="12" text-anchor="middle">Budget Cards (AAQAOt)</text>
-  </g>
-
-  <rect x="1040" y="500" width="240" height="150" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
-  <text x="1055" y="525" fill="#f9ab00" font-size="12" font-weight="700">Executive Looker Metrics:</text>
-  <text x="1055" y="547" fill="#3c4043" font-size="11.5">• Total Tokens &amp; Cost USD</text>
-  <text x="1055" y="567" fill="#3c4043" font-size="11.5">• Top User Leaderboard Ranking</text>
-  <text x="1055" y="587" fill="#3c4043" font-size="11.5">• Model Family Donut Share</text>
-  <text x="1055" y="607" fill="#3c4043" font-size="11.5">• SAP Cost Center Chargeback</text>
-  <text x="1055" y="628" fill="#1e8e3e" font-size="12" font-weight="700">Real-Time Refresh Enabled</text>
+  <rect x="1040" y="300" width="240" height="345" rx="8" fill="#ffffff" stroke="#dadce0" stroke-width="1" filter="url(#cardShadow)" />
+  <text x="1055" y="325" fill="#f9ab00" font-size="12" font-weight="700">Cockpit Visualizations:</text>
+  <text x="1055" y="347" fill="#3c4043" font-size="11.5">• 5 KPI Header Scorecards</text>
+  <text x="1055" y="367" fill="#3c4043" font-size="11.5">• Top User Leaderboard</text>
+  <text x="1055" y="387" fill="#3c4043" font-size="11.5">• Business Category Donut</text>
+  <text x="1055" y="407" fill="#3c4043" font-size="11.5">• Strategic Value Donut</text>
+  <text x="1055" y="427" fill="#3c4043" font-size="11.5">• Autonomous Agent Table</text>
+  <text x="1055" y="447" fill="#3c4043" font-size="11.5">• Filtered Tools Chart</text>
+  <text x="1055" y="467" fill="#3c4043" font-size="11.5">• Value &amp; Budget Matrix</text>
+  <text x="1055" y="487" fill="#3c4043" font-size="11.5">• 10 SAP Tag Chargeback</text>
+  <text x="1055" y="507" fill="#3c4043" font-size="11.5">• 5 Top Dropdown Filters</text>
+  <text x="1055" y="535" fill="#1e8e3e" font-size="12" font-weight="700">Sub-Second Refresh</text>
 
   <!-- ==================== FLOW ARROWS (CLEAN INDEPENDENT CHANNELS) ==================== -->
 
   <!-- User Inbound Prompts (Blue) -->
-  <path d="M 192 202 L 370 202" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
-  <path d="M 192 392 L 280 392 L 280 220 L 370 220" fill="none" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)" />
+  <path d="M 197 192 L 355 192" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
+  <path d="M 197 362 L 270 362 L 270 210 L 355 210" fill="none" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)" />
 
   <!-- ADK Agent to SCADA Tool (Yellow Dashed) -->
-  <path d="M 434 202 L 515 202" fill="none" stroke="#f9ab00" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowYellow)" />
+  <path d="M 419 192 L 505 192" fill="none" stroke="#f9ab00" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowYellow)" />
 
   <!-- ADK Agent to Vertex AI (Red Overhead Arc) -->
-  <path d="M 402 170 L 402 145 L 757 145 L 757 170" fill="none" stroke="#d93025" stroke-width="2.5" marker-end="url(#arrowRed)" />
+  <path d="M 387 160 L 387 135 L 717 135 L 717 160" fill="none" stroke="#d93025" stroke-width="2.5" marker-end="url(#arrowRed)" />
 
   <!-- ADK Agent to BigQuery Plugin (Green Direct Vertical) -->
-  <path d="M 475 234 L 475 350" fill="none" stroke="#1e8e3e" stroke-width="2.5" marker-end="url(#arrowGreen)" />
+  <path d="M 465 224 L 465 330" fill="none" stroke="#1e8e3e" stroke-width="2.5" marker-end="url(#arrowGreen)" />
 
   <!-- BigQuery Plugin to BigQuery Table (Blue Down-and-Right) -->
-  <path d="M 507 382 L 650 382 L 650 542 L 793 542" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
+  <path d="M 497 362 L 635 362 L 635 532 L 788 532" fill="none" stroke="#1a73e8" stroke-width="2.5" marker-end="url(#arrowBlue)" />
 
-  <!-- CHANNEL A: BigQuery to Looker Studio (Orange - Channel at x=990) -->
-  <path d="M 857 530 L 990 530 L 990 202 L 1128 202" fill="none" stroke="#f9ab00" stroke-width="2.5" marker-end="url(#arrowYellow)" />
-
-  <!-- CHANNEL B: BigQuery to Google Chat (Green Dashed - Channel at x=1010, ZERO OVERLAP) -->
-  <path d="M 857 560 L 1010 560 L 1010 392 L 1128 392" fill="none" stroke="#1e8e3e" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowGreen)" />
+  <!-- BigQuery to Looker Studio (Orange Channel at x=1005) -->
+  <path d="M 852 532 L 1005 532 L 1005 192 L 1128 192" fill="none" stroke="#f9ab00" stroke-width="2.5" marker-end="url(#arrowYellow)" />
 
 </svg>
 """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(svg)
-    print(f"✅ Rendered Clean Routing Diagram: {output_path}")
+    print(f"✅ Rendered Clean Architecture Diagram: {output_path}")
 
 if __name__ == "__main__":
     render_genai_governance_mingrammer_svg("/Users/alexandrade/codes/catlab/light/genai-token-governance/docs/architecture_genai_governance.svg")
