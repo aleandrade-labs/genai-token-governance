@@ -206,16 +206,22 @@ At the bottom of the page, add the full 10-tag audit matrix:
 
 ---
 
-## 🚀 How to Populate & Refresh Data in BigQuery
+## 🚀 How to Populate & Refresh Data in BigQuery (100% Real Tokens)
 
-### 1. High-Volume Batch Generator (Simulated Millions of Tokens):
-```bash
-cd /Users/alexandrade/codes/catlab/light/genai-token-governance
-.venv/bin/python3 src/generate_value_transformation_batch.py --sessions 500 --days 30
-```
-
-### 2. Live Vertex AI Gemini Real API Batch:
+### 1. Live Vertex AI Gemini Real API Batch:
 ```bash
 cd /Users/alexandrade/codes/catlab/light/genai-token-governance
 .venv/bin/python3 src/run_live_gemini_batch.py --rounds 2
+```
+
+### 2. Live Interactive ADK Agent:
+```bash
+cd /Users/alexandrade/codes/catlab/light/genai-token-governance
+.venv/bin/python3 src/run_official_adk_agent.py
+```
+
+### 3. Interactive Terminal Chat Shell:
+```bash
+cd /Users/alexandrade/codes/catlab/light/genai-token-governance
+.venv/bin/python3 src/interactive_chat.py
 ```
