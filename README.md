@@ -113,20 +113,24 @@ Run the official Google ADK agent natively using your authenticated **`admin@ale
 
 ---
 
-## 📈 6. How to Generate High-Volume MOCK / Synthetic Datasets
+## 🚀 6. Big Batch & Live Value Transformation Workload Generation
 
-When preparing for large-scale executive demos or stress-testing Looker Studio performance with **millions of tokens**:
+Generate massive production workloads tagged with **`qualificado_como`** (`Receita`, `Transformacional`, `Corporativo`, `Core`) and **`valor`** (`Alto`, `Baixo`):
 
+### Option A: High-Volume Big Batch Generator (Simulated Millions of Tokens)
 ```bash
-# Generate 10,000 enterprise sessions (~550 Million Tokens) and upload to BigQuery:
-.venv/bin/python3 src/generate_demo_telemetry.py --sessions 10000 --upload --days 30
+# Generate 500 multi-turn sessions (~20 Million Tokens) across 30 days into BigQuery:
+.venv/bin/python3 src/generate_value_transformation_batch.py --sessions 500 --days 30
+
+# Generate 1,500 sessions (~60 Million Tokens):
+.venv/bin/python3 src/generate_value_transformation_batch.py --sessions 1500 --days 60
 ```
 
-### Options:
-- `--sessions 5000`: Number of multi-turn sessions to simulate.
-- `--days 14`: Time distribution window (past N days).
-- `--append`: Append to existing data instead of replacing.
-- `--upload`: Automatically invoke `bq load` into BigQuery table.
+### Option B: Real Live Gemini Batch Execution on Vertex AI
+```bash
+# Execute real Gemini 2.5 Flash / Pro API calls for each agent and stream to BigQuery:
+.venv/bin/python3 src/run_live_gemini_batch.py --rounds 2
+```
 
 ---
 
@@ -148,13 +152,15 @@ bq query --use_legacy_sql=false "TRUNCATE TABLE aleorg-dev-workload-01.genai_fin
 
 ## 🗄️ 8. BigQuery Schema & Analytical Views
 
-The repository includes pre-built SQL views under [`bigquery/adk_agent_analytics_views.sql`](bigquery/adk_agent_analytics_views.sql):
+The repository provides pre-built SQL views under `aleorg-dev-workload-01.genai_finops_governance`:
 
 | View Name | Purpose | Looker Studio Visualization |
 | :--- | :--- | :--- |
+| **`v_genai_governance_dashboard`** | Master unified view with all 10 Customer Policy Tags + `qualificado_como` + `valor` | Master Dashboard View |
+| **`v_value_transformation_dashboard`** | Strategic value transformation & budget tracking view | Value & Budget Matrix |
 | **`v_adk_executive_kpis`** | Global tokens, active sessions, tool success %, total USD cost | Header Scorecards |
 | **`v_adk_user_leaderboard`** | Consumption ranked by email, app name, and cost center | User Leaderboard Table |
-| **`v_adk_model_distribution`**| Breakdown across Gemini 1.5 Flash, Pro, and Gemini 2.0 | Model Family Donut Chart |
+| **`v_adk_model_distribution`**| Breakdown across Gemini 2.5, 2.0, and 1.5 Flash/Pro | Model Family Donut Chart |
 | **`v_adk_cost_center_attribution`**| Financial chargeback breakdown by SAP Cost Center | Chargeback Attribution Table |
 | **`v_adk_tool_analytics`** | Function calling frequency, latency ms, and error rate | Tool Observability Bar Chart |
 | **`v_adk_daily_trend`** | 30-day token volume and cost trajectory | Time Series Line Chart |
@@ -163,41 +169,8 @@ The repository includes pre-built SQL views under [`bigquery/adk_agent_analytics
 
 ## 📊 9. Executive Looker Studio Dashboard Setup
 
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  🧠 GOOGLE CLOUD PSO — GENAI TOKEN & COST GOVERNANCE DASHBOARD                                           │
-├──────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                          │
-│  [ Total Sessions ]     [ Total Tokens ]       [ Cached Tokens ]       [ Total AI Cost (USD) ]           │
-│         5                    30,338                 10,928                    $ 0.01                     │
-│                                                                                                          │
-├────────────────────────────────────────────────────┬─────────────────────────────────────────────────────┤
-│  👤 TOP GENAI CONSUMERS (ALTOSTRAT ENVIRONMENT)   │  🤖 TOKEN DISTRIBUTION BY MODEL                     │
-│  ┌────────────────────────────────────┬───────────┐│  ┌────────────────────────┬─────────────┬─────────┐ │
-│  │ User / Identity                    │ Tokens    ││  │ Model Name             │ Tokens      │ Share % │ │
-│  ├────────────────────────────────────┼───────────┤│  ├────────────────────────┼─────────────┼─────────┤ │
-│  │ alexandrade@google.com             │ 9,300     ││  │ gemini-1.5-flash       │ 14,088      │  46.4%  │ │
-│  │ admin@alexandrade.altostrat.com    │ 16,618    ││  │ gemini-1.5-pro         │  9,300      │  30.7%  │ │
-│  │ sa-finops-label-governance@...     │ 4,420     ││  │ gemini-2.0-flash       │  6,950      │  22.9%  │ │
-│  └────────────────────────────────────┴───────────┘│  └────────────────────────┴─────────────┴─────────┘ │
-├────────────────────────────────────────────────────┴─────────────────────────────────────────────────────┤
-│  🏢 COST ALLOCATION BY SAP COST CENTER & APPLICATION CODE                                                │
-│  ┌─────────────┬─────────────┬───────────────────────────┬──────────────┬──────────────────┐             │
-│  │ Cost Center │ App Code    │ Application Name          │ Total Tokens │ Total Cost (USD) │             │
-│  ├─────────────┼─────────────┼───────────────────────────┼──────────────┼──────────────────┤             │
-│  │ 12272260    │ cds-59339   │ conexao_silvestre_pd      │  9,300       │ $ 0.01           │             │
-│  │ 18207115    │ cds-91023   │ substation_copilot        │  6,950       │ $ 0.00           │             │
-│  │ 18207243    │ cds-34199   │ attendance_sac            │  5,880       │ $ 0.00           │             │
-│  │ 18206922    │ cds-77211   │ smart_meter_rag           │  4,420       │ $ 0.00           │             │
-│  │ 18207041    │ cds-34242   │ energy_watch_grid         │  3,788       │ $ 0.00           │             │
-│  └─────────────┴─────────────┴───────────────────────────┴──────────────┴──────────────────┘             │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Steps to Refresh Looker Studio:
-1. Open your **Looker Studio Report**.
-2. Click **`...` (More Options) $\rightarrow$ Refresh Data** (or press `Ctrl+Shift+R` / `Cmd+Shift+R`).
-3. All charts instantly reflect your latest BigQuery runs!
+Refer to the complete, step-by-step guide:  
+👉 **[Looker Studio GenAI & ADK Governance: Complete Click-by-Click Guide](docs/LOOKER_STUDIO_DASHBOARD.md)**
 
 ---
 
@@ -205,8 +178,9 @@ The repository includes pre-built SQL views under [`bigquery/adk_agent_analytics
 
 | Command | Purpose |
 | :--- | :--- |
+| `.venv/bin/python3 src/generate_value_transformation_batch.py --sessions 500` | Generate high-volume batch with `qualificado_como` & `valor` |
+| `.venv/bin/python3 src/run_live_gemini_batch.py --rounds 2` | Make real live Vertex AI Gemini calls & stream to BigQuery |
 | `.venv/bin/python3 src/run_official_adk_agent.py` | Run single live interactive ADK agent session |
-| `.venv/bin/python3 src/run_official_adk_agent.py --clear` | Erase past data & run 1 clean session |
 | `.venv/bin/python3 src/run_official_adk_agent.py --clear --batch` | Erase past data & run multi-workload Altostrat batch |
-| `.venv/bin/python3 src/run_official_adk_agent.py --user "email@domain.com"` | Run session with custom user identity |
-| `.venv/bin/python3 src/generate_demo_telemetry.py --sessions 10000 --upload` | Generate 550M+ synthetic demo tokens |
+| `.venv/bin/python3 src/interactive_chat.py` | Interactive terminal shell with dynamic model/app switching |
+

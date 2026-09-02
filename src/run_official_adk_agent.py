@@ -249,12 +249,12 @@ async def run_live_agent(user_id: str = None, model_choice: str = "gemini-1.5-fl
         location=LOCATION,
         config=BigQueryLoggerConfig(
             enabled=True,
-            batch_size=1,              # Flush immediately for real-time observability
+            batch_size=1,
             shutdown_timeout=5.0,
-            auto_schema_upgrade=True,  # Automatically evolves BigQuery schema
-            create_views=True,         # Auto-generates flat analytical views
+            auto_schema_upgrade=True,
+            create_views=True,
             view_prefix="v_adk_official",
-            # 🏷️ Official Customer Policy Tags attached to every ADK event in BigQuery
+            # 🏷️ Official Customer Policy Labels attached to every ADK event in BigQuery
             custom_tags={
                 "owner": "arquitetura",
                 "cost_center": "18207041",
