@@ -15,15 +15,16 @@
 ## 📋 Table of Contents
 1. [Executive Overview & Value Proposition](#-1-executive-overview--value-proposition)
 2. [End-to-End Architecture](#-2-end-to-end-architecture)
-3. [Real-Time Storage Write API vs. Billing Latency](#-3-real-time-storage-write-api-vs-billing-latency)
-4. [Quickstart: Setup & Prerequisites](#-4-quickstart-setup--prerequisites)
-5. [Live Vertex AI Token Generation Suite](#-5-live-vertex-ai-token-generation-suite)
-6. [Interactive Terminal AI Assistant](#-6-interactive-terminal-ai-assistant)
-7. [Official Google ADK Multi-Agent Execution](#-7-official-google-adk-multi-agent-execution)
-8. [How to Erase / Reset BigQuery Data](#-8-how-to-erase--reset-bigquery-data)
-9. [BigQuery Schema & Analytical Views](#-9-bigquery-schema--analytical-views)
-10. [Executive Looker Studio Dashboard Setup](#-10-executive-looker-studio-dashboard-setup)
-11. [CLI Command Reference](#-11-cli-command-reference)
+3. [🏛️ Ingestion Architecture Comparison (ADK vs. Streaming vs. Logging vs. Batch)](docs/INGESTION_ARCHITECTURE_OPTIONS.md)
+4. [Real-Time Storage Write API vs. Billing Latency](#-3-real-time-storage-write-api-vs-billing-latency)
+5. [Quickstart: Setup & Prerequisites](#-4-quickstart-setup--prerequisites)
+6. [Live Vertex AI Token Generation Suite](#-5-live-vertex-ai-token-generation-suite)
+7. [Interactive Terminal AI Assistant](#-6-interactive-terminal-ai-assistant)
+8. [Official Google ADK Multi-Agent Execution](#-7-official-google-adk-multi-agent-execution)
+9. [How to Erase / Reset BigQuery Data](#-8-how-to-erase--reset-bigquery-data)
+10. [BigQuery Schema & Analytical Views](#-9-bigquery-schema--analytical-views)
+11. [Executive Looker Studio Dashboard Setup](#-10-executive-looker-studio-dashboard-setup)
+12. [CLI Command Reference](#-11-cli-command-reference)
 
 ---
 
