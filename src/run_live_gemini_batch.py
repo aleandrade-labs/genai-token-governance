@@ -4,31 +4,30 @@
 
 Executes REAL multi-turn API calls to Google Vertex AI across diverse Gemini model tiers:
   - `gemini-2.5-pro`        (Flagship Deep Reasoning, Complex Architecture, Legal & Executive)
-  - `gemini-2.5-flash`      (Enterprise Workhorse, Commercial Proposals, FinOps, SCADA)
+  - `gemini-2.5-flash`      (Enterprise Standard, Commercial Proposals, FinOps, SCADA)
   - `gemini-2.5-flash-lite` (Ultra-Fast, High-Throughput Operations, HR, Onboarding, Press)
 
 Features:
   - 100% REAL Token Counts from Vertex AI `usage_metadata` (Prompt, Candidate, Thought tokens)
   - Real Latency measurements from live network roundtrips
+  - REAL-TIME SUB-SECOND STREAMING: Flushes each event to BigQuery immediately after generation!
+  - Concurrent Parallel Execution: Runs agents concurrently for high-speed batch generation.
   - Strategic Business Labeling (`qualificado_como` = Receita/Transformacional/Corporativo/Core, `valor` = Alto/Baixo)
   - Full 10 Customer Policy Tags from Light S/A SAP Taxonomy
-  - Sub-second streaming directly into BigQuery (`agent_events` and analytical views)
 
 Usage:
-  # Execute 1 real live round across all 11 enterprise agents with balanced model tiering:
+  # Fast parallel live run across all 11 enterprise agents (finishes in ~10 seconds):
   .venv/bin/python3 src/run_live_gemini_batch.py
 
-  # Execute 3 real rounds with rotating model distribution:
-  .venv/bin/python3 src/run_live_gemini_batch.py --rounds 3 --distribute-models
+  # Run 3 live rounds with parallel execution:
+  .venv/bin/python3 src/run_live_gemini_batch.py --rounds 3 --parallel 5
 
-  # Run all agents across ALL model tiers to compare Flash vs Pro vs Flash-Lite:
-  .venv/bin/python3 src/run_live_gemini_batch.py --all-models
-
-  # Force a specific model:
-  .venv/bin/python3 src/run_live_gemini_batch.py --model gemini-2.5-pro
+  # Run with rotating model distribution:
+  .venv/bin/python3 src/run_live_gemini_batch.py --rounds 3 --distribute-models --parallel 5
 """
 
 import argparse
+import concurrent.futures
 import datetime
 import json
 import os
@@ -265,17 +264,101 @@ PRICING = {
 
 AVAILABLE_MODELS = list(PRICING.keys())
 
+def run_single_agent_turn(agent_info: dict, model_name: str, client: genai.Client, bq_client: bigquery.Client, table_ref: str) -> dict:
+    """
+    Executes a single real Vertex AI call and IMMEDIATELY streams the telemetry row to BigQuery.
+    """
+    model_tier = PRICING.get(model_name, {}).get("tier", "Standard")
+    print(f"\n🤖 \033[1;34m[{agent_info['agent_name']}]\033[0m | User: {agent_info['user_id']} | Model: \033[1;33m{model_name}\033[0m ({model_tier})")
+    print(f"   🏷️  Qualificado como: \033[1m{agent_info['qualificado_como']}\033[0m | Valor: \033[1m{agent_info['valor']}\033[0m | Budget: ${agent_info['budget_usd']:,.0f}")
+    print(f"   📝 Prompt: \"{agent_info['prompt'][:75]}...\"")
+
+    start_t = time.time()
+    try:
+        response = client.models.generate_content(
+            model=model_name,
+            contents=agent_info["prompt"]
+        )
+        latency_ms = int((time.time() - start_t) * 1000)
+        usage = response.usage_metadata
+
+        prompt_tok = usage.prompt_token_count
+        out_tok = usage.candidates_token_count
+        total_tok = usage.total_token_count
+
+        pricing_info = PRICING.get(model_name, PRICING["gemini-2.5-flash"])
+        cost = ((prompt_tok / 1_000_000.0) * pricing_info["in"]) + ((out_tok / 1_000_000.0) * pricing_info["out"])
+
+        now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        session_id = f"sess_live_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+        trace_id = f"trace_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+
+        row = {
+            "trace_id": trace_id,
+            "span_id": f"span_{uuid.uuid4().hex[:6]}",
+            "parent_span_id": None,
+            "event_type": "LLM_RESPONSE",
+            "timestamp": now_str,
+            "session_id": session_id,
+            "turn_number": 1,
+            "agent_name": agent_info["agent_name"],
+            "model_name": model_name,
+            "user_id": agent_info["user_id"],
+            
+            # 🏷️ Customer Strategic Transformation Labels:
+            "qualificado_como": agent_info["qualificado_como"],
+            "valor": agent_info["valor"],
+            "budget_usd": agent_info["budget_usd"],
+            "token_errors": 0,
+
+            # 🏷️ 10 Customer Policy Tags:
+            "owner": agent_info["owner"],
+            "cost_center": agent_info["cost_center"],
+            "app_code": agent_info["app_code"],
+            "app_name": agent_info["app_name"],
+            "environment": agent_info["environment"],
+            "criticidade": agent_info["criticidade"],
+            "it_core": agent_info["it_core"],
+            "equipe_do_servico": agent_info["equipe_do_servico"],
+            "gerencia_responsavel": agent_info["gerencia_responsavel"],
+            "business_owner": agent_info["business_owner"],
+
+            # 🔢 Genuine Token Metrics from Vertex AI:
+            "prompt_tokens": prompt_tok,
+            "cached_tokens": 0,
+            "output_tokens": out_tok,
+            "total_tokens": total_tok,
+            "latency_ms": float(latency_ms),
+            "status": "SUCCESS",
+            "tool_name": None
+        }
+
+        # ⚡ REAL-TIME STREAMING: Insert immediately into BigQuery
+        errors = bq_client.insert_rows_json(table_ref, [row])
+        if errors:
+            print(f"   ⚠️ BigQuery streaming notice: {errors}")
+        else:
+            print(f"   ⚡ \033[1;32m[Synced to BigQuery]\033[0m {latency_ms} ms | 🔢 Prompt: {prompt_tok} | Output: {out_tok} | Total: \033[1;32m{total_tok:,} real tokens\033[0m | 💰 ${cost:.6f} USD")
+        
+        return {"status": "SUCCESS", "tokens": total_tok, "cost": cost, "latency": latency_ms}
+
+    except Exception as e:
+        print(f"   ❌ Error calling {model_name} on Vertex AI: {e}")
+        return {"status": "ERROR", "tokens": 0, "cost": 0.0, "latency": 0}
+
 def execute_live_batch(
     rounds: int = 1,
     force_model: str = None,
     all_models: bool = False,
-    distribute_models: bool = False
+    distribute_models: bool = False,
+    parallel_workers: int = 1
 ):
     print("\n" + "═" * 85)
     print("🚀 \033[1;32mEXECUTING 100% REAL VERTEX AI MULTI-MODEL GENERATION SUITE\033[0m")
     print(f"   • Project ID       : {PROJECT_ID} (Region: {LOCATION})")
     print(f"   • Total Agents     : {len(LIVE_AGENT_PROMPTS)}")
     print(f"   • Active Models    : {', '.join(AVAILABLE_MODELS)}")
+    print(f"   • Parallel Workers : {parallel_workers}")
     print(f"   • Strategic Labels : `qualificado_como` (Receita/Transformacional/Corporativo/Core) | `valor` (Alto/Baixo)")
     print("═" * 85 + "\n")
 
@@ -285,110 +368,48 @@ def execute_live_batch(
 
     total_tokens_accum = 0
     total_cost_accum = 0.0
-    rows_to_insert = []
+    total_calls_accum = 0
 
+    tasks = []
     for round_idx in range(1, rounds + 1):
-        print(f"\n🔄 --- STARTING LIVE ROUND {round_idx}/{rounds} ---")
         for agent_info in LIVE_AGENT_PROMPTS:
-            
-            # Determine which models to run for this agent
             if all_models:
                 models_to_test = AVAILABLE_MODELS
             elif force_model:
                 models_to_test = [force_model]
             elif distribute_models:
-                # Rotate across models per round
                 models_to_test = [random.choice(AVAILABLE_MODELS)]
             else:
                 models_to_test = [agent_info["default_model"]]
 
-            for model_name in models_to_test:
-                model_tier = PRICING.get(model_name, {}).get("tier", "Standard")
-                print(f"\n🤖 \033[1;34m[{agent_info['agent_name']}]\033[0m | User: {agent_info['user_id']} | Model: \033[1;33m{model_name}\033[0m ({model_tier})")
-                print(f"   🏷️  Qualificado como: \033[1m{agent_info['qualificado_como']}\033[0m | Valor: \033[1m{agent_info['valor']}\033[0m | Budget: ${agent_info['budget_usd']:,.0f}")
-                print(f"   📝 Prompt: \"{agent_info['prompt'][:75]}...\"")
+            for m in models_to_test:
+                tasks.append((agent_info, m))
 
-                start_t = time.time()
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=agent_info["prompt"]
-                    )
-                    latency_ms = int((time.time() - start_t) * 1000)
-                    usage = response.usage_metadata
+    print(f"⚡ Queueing {len(tasks)} real live calls across {rounds} round(s)...")
 
-                    prompt_tok = usage.prompt_token_count
-                    out_tok = usage.candidates_token_count
-                    total_tok = usage.total_token_count
-
-                    pricing_info = PRICING.get(model_name, PRICING["gemini-2.5-flash"])
-                    cost = ((prompt_tok / 1_000_000.0) * pricing_info["in"]) + ((out_tok / 1_000_000.0) * pricing_info["out"])
-
-                    total_tokens_accum += total_tok
-                    total_cost_accum += cost
-
-                    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-                    session_id = f"sess_live_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-                    trace_id = f"trace_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-
-                    row = {
-                        "trace_id": trace_id,
-                        "span_id": f"span_{uuid.uuid4().hex[:6]}",
-                        "parent_span_id": None,
-                        "event_type": "LLM_RESPONSE",
-                        "timestamp": now_str,
-                        "session_id": session_id,
-                        "turn_number": 1,
-                        "agent_name": agent_info["agent_name"],
-                        "model_name": model_name,
-                        "user_id": agent_info["user_id"],
-                        
-                        # 🏷️ Customer Strategic Transformation Labels:
-                        "qualificado_como": agent_info["qualificado_como"],
-                        "valor": agent_info["valor"],
-                        "budget_usd": agent_info["budget_usd"],
-                        "token_errors": 0,
-
-                        # 🏷️ 10 Customer Policy Tags:
-                        "owner": agent_info["owner"],
-                        "cost_center": agent_info["cost_center"],
-                        "app_code": agent_info["app_code"],
-                        "app_name": agent_info["app_name"],
-                        "environment": agent_info["environment"],
-                        "criticidade": agent_info["criticidade"],
-                        "it_core": agent_info["it_core"],
-                        "equipe_do_servico": agent_info["equipe_do_servico"],
-                        "gerencia_responsavel": agent_info["gerencia_responsavel"],
-                        "business_owner": agent_info["business_owner"],
-
-                        # 🔢 Genuine Token Metrics from Vertex AI:
-                        "prompt_tokens": prompt_tok,
-                        "cached_tokens": 0,
-                        "output_tokens": out_tok,
-                        "total_tokens": total_tok,
-                        "latency_ms": float(latency_ms),
-                        "status": "SUCCESS",
-                        "tool_name": None
-                    }
-
-                    rows_to_insert.append(row)
-                    print(f"   ⏱️  {latency_ms} ms | 🔢 Prompt: {prompt_tok} | Output: {out_tok} | Total: \033[1;32m{total_tok:,} real tokens\033[0m | 💰 ${cost:.6f} USD")
-                    print(f"   💬 Response Preview: {response.text[:110].strip()}...")
-
-                except Exception as e:
-                    print(f"   ❌ Error calling {model_name} on Vertex AI: {e}")
-
-    if rows_to_insert:
-        print(f"\n📦 Streaming {len(rows_to_insert)} real-time events into BigQuery `{table_ref}`...")
-        errors = bq_client.insert_rows_json(table_ref, rows_to_insert)
-        if not errors:
-            print("✅ All real multi-model agent events successfully synced to BigQuery!")
-        else:
-            print(f"⚠️ BigQuery insert notice: {errors}")
+    if parallel_workers > 1:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_workers) as executor:
+            future_to_task = {
+                executor.submit(run_single_agent_turn, agent, m, client, bq_client, table_ref): (agent, m)
+                for agent, m in tasks
+            }
+            for future in concurrent.futures.as_completed(future_to_task):
+                res = future.result()
+                if res["status"] == "SUCCESS":
+                    total_tokens_accum += res["tokens"]
+                    total_cost_accum += res["cost"]
+                    total_calls_accum += 1
+    else:
+        for agent, m in tasks:
+            res = run_single_agent_turn(agent, m, client, bq_client, table_ref)
+            if res["status"] == "SUCCESS":
+                total_tokens_accum += res["tokens"]
+                total_cost_accum += res["cost"]
+                total_calls_accum += 1
 
     print("\n" + "═" * 85)
     print("📈 \033[1;32mREAL MULTI-MODEL BATCH EXECUTION SUMMARY\033[0m:")
-    print(f"   • Total Live Calls   : {len(rows_to_insert)}")
+    print(f"   • Total Live Calls   : {total_calls_accum}")
     print(f"   • Total Real Tokens  : \033[1m{total_tokens_accum:,}\033[0m")
     print(f"   • Total Real Cost    : \033[1m${total_cost_accum:.6f} USD\033[0m")
     print(f"   • BigQuery Table     : `{table_ref}`")
@@ -400,13 +421,15 @@ def main():
     parser.add_argument("--model", type=str, default=None, help="Force specific Gemini model (e.g. gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite)")
     parser.add_argument("--all-models", action="store_true", help="Execute each agent prompt across ALL 3 Gemini model tiers")
     parser.add_argument("--distribute-models", action="store_true", help="Randomly rotate and distribute models across agents")
+    parser.add_argument("--parallel", type=int, default=4, help="Number of parallel worker threads for fast execution (default: 4)")
     args = parser.parse_args()
 
     execute_live_batch(
         rounds=args.rounds,
         force_model=args.model,
         all_models=args.all_models,
-        distribute_models=args.distribute_models
+        distribute_models=args.distribute_models,
+        parallel_workers=args.parallel
     )
 
 if __name__ == "__main__":
