@@ -206,8 +206,10 @@ Add a Horizontal Bar Chart on the lower-right (`Insert > Bar chart > Horizontal`
 - **Filter (Crucial Step):**
   1. In the right-hand **Setup** panel, scroll down to **Filter** $\rightarrow$ Click **`+ Add a Filter`** $\rightarrow$ **`Create a Filter`**.
   2. **Name:** `Exclude Null Tools`
-  3. **Clause:** `Include` $\rightarrow$ Field: `tool_name` $\rightarrow$ Condition: `Is not null`.
-  4. Click **Save**. *The top empty bar disappears and only real function calls (`query_scada`, `sap_erp`, `legal_contract`) are shown!*
+  3. **First Dropdown (Action):** Select **`Exclude`** *(change from Include)*
+  4. **Field:** **`tool_name`**
+  5. **Condition:** **`Is Null`**
+  6. Click **Save**. *Rows without tools are excluded, and only real function calls (`query_scada_historian`, `sap_erp_billing_lookup`, etc.) are displayed!*
 
 ---
 
